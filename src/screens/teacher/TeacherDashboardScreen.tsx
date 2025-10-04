@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,12 +6,81 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useUser } from '@clerk/clerk-expo';
+import { supabase } from '../../services/supabase';
+
+interface TeacherStats {
+  totalClasses: number;
+  studentsReached: number;
+  averageRating: number;
+}
 
 const TeacherDashboardScreen = () => {
   const navigation = useNavigation();
+  const { user } = useUser();
+  const [stats, setStats] = useState<TeacherStats>({ totalClasses: 0, studentsReached: 0, averageRating: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      fetchTeacherStats();
+    }
+  }, [user]);
+
+  const fetchTeacherStats = async () => {
+    try {
+      setLoading(true);
+      
+      // Get teacher's user data from Supabase
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('clerk_id', user?.id)
+        .single();
+
+      if (userError || !userData) {
+        console.error('Error fetching user data:', userError);
+        return;
+      }
+
+      // Fetch total classes created by this teacher
+      const { data: classesData, error: classesError } = await supabase
+        .from('classes')
+        .select('id')
+        .eq('teacher_id', userData.id);
+
+      if (classesError) {
+        console.error('Error fetching classes:', classesError);
+        return;
+      }
+
+      // Fetch total students reached (unique enrollments)
+      const { data: enrollmentsData, error: enrollmentsError } = await supabase
+        .from('enrollments')
+        .select('student_id, class_id, classes!inner(teacher_id)')
+        .eq('classes.teacher_id', userData.id);
+
+      if (enrollmentsError) {
+        console.error('Error fetching enrollments:', enrollmentsError);
+      }
+
+      const uniqueStudents = new Set(enrollmentsData?.map(e => e.student_id) || []).size;
+      
+      setStats({
+        totalClasses: classesData?.length || 0,
+        studentsReached: uniqueStudents,
+        averageRating: 4.8, // TODO: Implement rating system
+      });
+    } catch (error) {
+      console.error('Error fetching teacher stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const dashboardItems = [
     {
@@ -19,28 +88,28 @@ const TeacherDashboardScreen = () => {
       description: 'Share your yoga sessions with students',
       icon: 'videocam' as keyof typeof Ionicons.glyphMap,
       color: '#10b981',
-      onPress: () => console.log('Navigate to video upload'),
+      onPress: () => (navigation as any).navigate('Upload'),
     },
     {
       title: 'Schedule Live Class',
       description: 'Plan and schedule live yoga sessions',
       icon: 'calendar' as keyof typeof Ionicons.glyphMap,
       color: '#3b82f6',
-      onPress: () => console.log('Navigate to class scheduling'),
+      onPress: () => (navigation as any).navigate('My Classes'),
     },
     {
       title: 'View Analytics',
       description: 'Track student engagement and attendance',
       icon: 'analytics' as keyof typeof Ionicons.glyphMap,
       color: '#8b5cf6',
-      onPress: () => console.log('Navigate to analytics'),
+      onPress: () => (navigation as any).navigate('Analytics'),
     },
     {
       title: 'Manage Classes',
       description: 'Edit or delete your existing classes',
       icon: 'settings' as keyof typeof Ionicons.glyphMap,
       color: '#f59e0b',
-      onPress: () => console.log('Navigate to class management'),
+      onPress: () => (navigation as any).navigate('My Classes'),
     },
   ];
 
@@ -78,20 +147,27 @@ const TeacherDashboardScreen = () => {
 
         <View style={styles.quickStats}>
           <Text style={styles.statsTitle}>Quick Stats</Text>
-          <View style={styles.statsGrid}>
-            <View style={styles.statCard}>
-              <Text style={styles.statNumber}>12</Text>
-              <Text style={styles.statLabel}>Total Classes</Text>
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#10b981" />
+              <Text style={styles.loadingText}>Loading stats...</Text>
             </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statNumber}>156</Text>
-              <Text style={styles.statLabel}>Students Reached</Text>
+          ) : (
+            <View style={styles.statsGrid}>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>{stats.totalClasses}</Text>
+                <Text style={styles.statLabel}>Total Classes</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>{stats.studentsReached}</Text>
+                <Text style={styles.statLabel}>Students Reached</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>{stats.averageRating.toFixed(1)}</Text>
+                <Text style={styles.statLabel}>Average Rating</Text>
+              </View>
             </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statNumber}>4.8</Text>
-              <Text style={styles.statLabel}>Average Rating</Text>
-            </View>
-          </View>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -201,6 +277,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6b7280',
     textAlign: 'center',
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 14,
+    color: '#6b7280',
   },
 });
 

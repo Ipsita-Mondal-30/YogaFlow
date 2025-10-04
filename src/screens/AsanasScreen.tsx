@@ -10,8 +10,10 @@ import {
   RefreshControl,
   TextInput,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase, Asana } from '../services/supabase';
+import { colors } from '../utils/colors';
 
 export default function AsanasScreen() {
   const [asanas, setAsanas] = useState<Asana[]>([]);
@@ -73,13 +75,13 @@ export default function AsanasScreen() {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'beginner':
-        return '#10b981';
+        return colors.teal;
       case 'intermediate':
-        return '#f59e0b';
+        return colors.primary;
       case 'advanced':
-        return '#ef4444';
+        return colors.purple;
       default:
-        return '#6b7280';
+        return colors.textSecondary;
     }
   };
 
@@ -153,7 +155,10 @@ export default function AsanasScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <LinearGradient
+        colors={[colors.primary, colors.primaryLight]}
+        style={styles.header}
+      >
         <Text style={styles.title}>Free Asanas</Text>
         <Text style={styles.subtitle}>
           Learn yoga poses with detailed guides and instructions
@@ -192,7 +197,7 @@ export default function AsanasScreen() {
             </TouchableOpacity>
           ))}
         </ScrollView>
-      </View>
+      </LinearGradient>
 
       <ScrollView
         style={styles.asanasContainer}
@@ -256,7 +261,8 @@ export default function AsanasScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.background,
+    paddingBottom: 110,
   },
   centerContainer: {
     flex: 1,
@@ -269,7 +275,6 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   header: {
-    backgroundColor: 'white',
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
@@ -277,14 +282,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#065f46',
+    color: colors.textWhite,
     marginBottom: 5,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    color: colors.textWhite,
     marginBottom: 20,
     lineHeight: 24,
+    opacity: 0.9,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -309,15 +315,15 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#10b981',
+    borderColor: colors.primary,
     marginRight: 10,
   },
   activeDifficultyButton: {
-    backgroundColor: '#10b981',
+    backgroundColor: colors.primary,
   },
   difficultyButtonText: {
     fontSize: 14,
-    color: '#10b981',
+    color: colors.primary,
     fontWeight: '600',
   },
   activeDifficultyButtonText: {

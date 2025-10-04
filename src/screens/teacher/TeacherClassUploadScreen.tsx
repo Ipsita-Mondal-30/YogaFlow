@@ -8,9 +8,13 @@ import {
   TouchableOpacity,
   Alert,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import * as DocumentPicker from 'expo-document-picker';
+import { useUser } from '@clerk/clerk-expo';
+import { supabase } from '../../services/supabase';
 
 interface ClassFormData {
   title: string;
@@ -21,10 +25,14 @@ interface ClassFormData {
   videoUrl: string;
   thumbnailUrl: string;
   price: string;
+  classType: 'recorded' | 'live';
+  scheduledDate: string;
+  scheduledTime: string;
 }
 
 const TeacherClassUploadScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { user } = useUser();
   const [formData, setFormData] = useState<ClassFormData>({
     title: '',
     description: '',
@@ -34,12 +42,119 @@ const TeacherClassUploadScreen: React.FC = () => {
     videoUrl: '',
     thumbnailUrl: '',
     price: '',
+    classType: 'recorded',
+    scheduledDate: '',
+    scheduledTime: '',
   });
 
   const [isUploading, setIsUploading] = useState(false);
+  const [videoUploading, setVideoUploading] = useState(false);
+  const [thumbnailUploading, setThumbnailUploading] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState<any>(null);
+  const [selectedThumbnail, setSelectedThumbnail] = useState<any>(null);
 
   const handleInputChange = (field: keyof ClassFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleVideoUpload = async () => {
+    try {
+      setVideoUploading(true);
+      
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'video/*',
+        copyToCacheDirectory: true,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const file = result.assets[0];
+        setSelectedVideo(file);
+        
+        // Create a unique filename
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `videos/${fileName}`;
+
+        // Upload to Supabase Storage
+        const formData = new FormData();
+        formData.append('file', {
+          uri: file.uri,
+          type: file.mimeType || 'video/mp4',
+          name: fileName,
+        } as any);
+
+        const { data, error } = await supabase.storage
+          .from('class-videos')
+          .upload(filePath, formData);
+
+        if (error) {
+          throw error;
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('class-videos')
+          .getPublicUrl(filePath);
+
+        handleInputChange('videoUrl', publicUrl);
+        Alert.alert('Success', 'Video uploaded successfully!');
+      }
+    } catch (error) {
+      console.error('Video upload error:', error);
+      Alert.alert('Error', 'Failed to upload video. Please try again.');
+    } finally {
+      setVideoUploading(false);
+    }
+  };
+
+  const handleThumbnailUpload = async () => {
+    try {
+      setThumbnailUploading(true);
+      
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'image/*',
+        copyToCacheDirectory: true,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const file = result.assets[0];
+        setSelectedThumbnail(file);
+        
+        // Create a unique filename
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `thumbnails/${fileName}`;
+
+        // Upload to Supabase Storage
+        const formData = new FormData();
+        formData.append('file', {
+          uri: file.uri,
+          type: file.mimeType || 'image/jpeg',
+          name: fileName,
+        } as any);
+
+        const { data, error } = await supabase.storage
+          .from('class-thumbnails')
+          .upload(filePath, formData);
+
+        if (error) {
+          throw error;
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('class-thumbnails')
+          .getPublicUrl(filePath);
+
+        handleInputChange('thumbnailUrl', publicUrl);
+        Alert.alert('Success', 'Thumbnail uploaded successfully!');
+      }
+    } catch (error) {
+      console.error('Thumbnail upload error:', error);
+      Alert.alert('Error', 'Failed to upload thumbnail. Please try again.');
+    } finally {
+      setThumbnailUploading(false);
+    }
   };
 
   const handleUploadClass = async () => {
@@ -49,14 +164,70 @@ const TeacherClassUploadScreen: React.FC = () => {
       return;
     }
 
+    if (formData.classType === 'recorded' && !formData.videoUrl) {
+      Alert.alert('Error', 'Please upload a video for recorded classes');
+      return;
+    }
+
+    if (formData.classType === 'live' && (!formData.scheduledDate || !formData.scheduledTime)) {
+      Alert.alert('Error', 'Please select date and time for live classes');
+      return;
+    }
+
     setIsUploading(true);
     try {
-      // TODO: Implement actual class upload logic
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate upload
-      Alert.alert('Success', 'Class uploaded successfully!', [
+      // Get teacher's user data from Supabase
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('clerk_id', user?.id)
+        .single();
+
+      if (userError || !userData) {
+        throw new Error('Failed to get user data');
+      }
+
+      // Prepare class data
+      const isLive = formData.classType === 'live';
+      let startAt = null;
+      
+      if (isLive && formData.scheduledDate && formData.scheduledTime) {
+        startAt = new Date(`${formData.scheduledDate}T${formData.scheduledTime}:00`).toISOString();
+      }
+
+      // Insert class into database
+      const { data: classData, error: classError } = await supabase
+        .from('classes')
+        .insert({
+          title: formData.title,
+          description: formData.description,
+          duration: parseInt(formData.duration),
+          difficulty: formData.difficulty.toLowerCase(),
+          category: formData.category,
+          video_url: formData.videoUrl || null,
+          thumbnail_url: formData.thumbnailUrl || null,
+          price: parseFloat(formData.price) || 0,
+          teacher_id: userData.id,
+          is_live: isLive,
+          start_at: startAt,
+          created_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (classError) {
+        throw classError;
+      }
+
+      const successMessage = formData.classType === 'live' 
+        ? 'Live class scheduled successfully!' 
+        : 'Recorded class uploaded successfully!';
+      
+      Alert.alert('Success', successMessage, [
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);
     } catch (error) {
+      console.error('Class upload error:', error);
       Alert.alert('Error', 'Failed to upload class. Please try again.');
     } finally {
       setIsUploading(false);
@@ -164,29 +335,130 @@ const TeacherClassUploadScreen: React.FC = () => {
           </View>
         </View>
 
+        {/* Class Type */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Class Type</Text>
+          <View style={styles.optionsContainer}>
+            <TouchableOpacity
+              style={[
+                styles.optionButton,
+                formData.classType === 'recorded' && styles.selectedOption
+              ]}
+              onPress={() => handleInputChange('classType', 'recorded')}
+            >
+              <Text style={[
+                styles.optionText,
+                formData.classType === 'recorded' && styles.selectedOptionText
+              ]}>
+                📹 Recorded
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.optionButton,
+                formData.classType === 'live' && styles.selectedOption
+              ]}
+              onPress={() => handleInputChange('classType', 'live')}
+            >
+              <Text style={[
+                styles.optionText,
+                formData.classType === 'live' && styles.selectedOptionText
+              ]}>
+                🔴 Live
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Live Class Scheduling */}
+        {formData.classType === 'live' && (
+          <>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Scheduled Date *</Text>
+              <TextInput
+                style={styles.input}
+                value={formData.scheduledDate}
+                onChangeText={(value) => handleInputChange('scheduledDate', value)}
+                placeholder="YYYY-MM-DD (e.g., 2024-12-25)"
+                placeholderTextColor="#999"
+              />
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Scheduled Time *</Text>
+              <TextInput
+                style={styles.input}
+                value={formData.scheduledTime}
+                onChangeText={(value) => handleInputChange('scheduledTime', value)}
+                placeholder="HH:MM (e.g., 14:30)"
+                placeholderTextColor="#999"
+              />
+            </View>
+          </>
+        )}
+
         {/* Video Upload */}
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Video URL</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.videoUrl}
-            onChangeText={(value) => handleInputChange('videoUrl', value)}
-            placeholder="Enter video URL or upload video"
-            placeholderTextColor="#999"
-          />
-          <TouchableOpacity style={styles.uploadButton}>
-            <Ionicons name="cloud-upload-outline" size={20} color="#6B73FF" />
-            <Text style={styles.uploadButtonText}>Upload Video</Text>
+          <Text style={styles.label}>
+            Video {formData.classType === 'recorded' ? '*' : '(Optional for live classes)'}
+          </Text>
+          {selectedVideo ? (
+            <View style={styles.fileInfo}>
+              <Ionicons name="videocam" size={20} color="#10b981" />
+              <Text style={styles.fileName}>{selectedVideo.name}</Text>
+            </View>
+          ) : (
+            <TextInput
+              style={styles.input}
+              value={formData.videoUrl}
+              onChangeText={(value) => handleInputChange('videoUrl', value)}
+              placeholder="Enter video URL or upload video file"
+              placeholderTextColor="#999"
+            />
+          )}
+          <TouchableOpacity 
+            style={[styles.uploadButton, videoUploading && styles.disabledButton]} 
+            onPress={handleVideoUpload}
+            disabled={videoUploading}
+          >
+            {videoUploading ? (
+              <ActivityIndicator size="small" color="#6B73FF" />
+            ) : (
+              <Ionicons name="cloud-upload-outline" size={20} color="#6B73FF" />
+            )}
+            <Text style={styles.uploadButtonText}>
+              {videoUploading ? 'Uploading...' : 'Upload Video'}
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Thumbnail */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Thumbnail</Text>
-          <TouchableOpacity style={styles.thumbnailUpload}>
-            <Ionicons name="image-outline" size={40} color="#999" />
-            <Text style={styles.uploadText}>Upload Thumbnail</Text>
-          </TouchableOpacity>
+          {selectedThumbnail ? (
+            <View style={styles.thumbnailPreview}>
+              <Image source={{ uri: selectedThumbnail.uri }} style={styles.previewImage} />
+              <View style={styles.fileInfo}>
+                <Ionicons name="image" size={20} color="#10b981" />
+                <Text style={styles.fileName}>{selectedThumbnail.name}</Text>
+              </View>
+            </View>
+          ) : (
+            <TouchableOpacity 
+              style={[styles.thumbnailUpload, thumbnailUploading && styles.disabledButton]} 
+              onPress={handleThumbnailUpload}
+              disabled={thumbnailUploading}
+            >
+              {thumbnailUploading ? (
+                <ActivityIndicator size="large" color="#6B73FF" />
+              ) : (
+                <Ionicons name="image-outline" size={40} color="#999" />
+              )}
+              <Text style={styles.uploadText}>
+                {thumbnailUploading ? 'Uploading...' : 'Upload Thumbnail'}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Price */}
@@ -209,9 +481,13 @@ const TeacherClassUploadScreen: React.FC = () => {
           disabled={isUploading}
         >
           {isUploading ? (
-            <Text style={styles.uploadClassButtonText}>Uploading...</Text>
+            <Text style={styles.uploadClassButtonText}>
+              {formData.classType === 'live' ? 'Scheduling...' : 'Uploading...'}
+            </Text>
           ) : (
-            <Text style={styles.uploadClassButtonText}>Upload Class</Text>
+            <Text style={styles.uploadClassButtonText}>
+              {formData.classType === 'live' ? 'Schedule Live Class' : 'Upload Recorded Class'}
+            </Text>
           )}
         </TouchableOpacity>
       </View>
@@ -343,6 +619,33 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  fileInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: '#f0f9ff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#10b981',
+    marginBottom: 10,
+  },
+  fileName: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#10b981',
+    fontWeight: '500',
+  },
+  thumbnailPreview: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#10b981',
+    overflow: 'hidden',
+  },
+  previewImage: {
+    width: '100%',
+    height: 120,
+    resizeMode: 'cover',
   },
 });
 

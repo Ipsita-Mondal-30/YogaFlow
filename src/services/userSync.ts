@@ -32,20 +32,8 @@ export async function syncUserWithPrisma(clerkUser: ClerkUser): Promise<void> {
   try {
     const fullName = `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || 'User';
     
-    // Get role from AsyncStorage (set during signup)
-    let userRole: 'STUDENT' | 'TEACHER' | 'ADMIN' = 'STUDENT';
-    try {
-      const pendingRole = await AsyncStorage.getItem('pendingUserRole');
-      if (pendingRole === 'teacher') {
-        userRole = 'TEACHER';
-      } else if (pendingRole === 'student') {
-        userRole = 'STUDENT';
-      }
-      // Clear the pending role after use
-      await AsyncStorage.removeItem('pendingUserRole');
-    } catch (asyncError) {
-      console.log('No pending role found, defaulting to STUDENT');
-    }
+    // All users are now treated as regular users (no role distinction)
+    const userRole: 'STUDENT' | 'TEACHER' | 'ADMIN' = 'STUDENT';
 
     const userData: UserSyncData = {
       clerkId: clerkUser.id,
@@ -53,15 +41,9 @@ export async function syncUserWithPrisma(clerkUser: ClerkUser): Promise<void> {
       name: fullName,
       avatarUrl: clerkUser.imageUrl || undefined,
       role: userRole,
-      // Initialize role-specific defaults
-      ...(userRole === 'STUDENT' && {
-        subscriptionPlan: 'free',
-        totalClassesJoined: 0,
-      }),
-      ...(userRole === 'TEACHER' && {
-        certifications: [],
-        experience: 0,
-      }),
+      // Initialize default user settings
+      subscriptionPlan: 'free',
+      totalClassesJoined: 0,
     };
 
     // Check if user already exists
@@ -73,7 +55,7 @@ export async function syncUserWithPrisma(clerkUser: ClerkUser): Promise<void> {
     } else {
       // Create new user
       await DatabaseService.createUser(userData);
-      console.log(`User created in Prisma with role ${userRole}:`, clerkUser.id);
+      console.log('User created in Prisma:', clerkUser.id);
     }
   } catch (error) {
     console.error('Error syncing user with Prisma:', error);
@@ -87,16 +69,8 @@ export async function syncUserWithPrisma(clerkUser: ClerkUser): Promise<void> {
  */
 export async function syncUserWithSupabase(clerkUser: ClerkUser): Promise<void> {
   try {
-    // Get role from AsyncStorage or default to student
-    let userRole = 'student';
-    try {
-      const pendingRole = await AsyncStorage.getItem('pendingUserRole');
-      if (pendingRole) {
-        userRole = pendingRole;
-      }
-    } catch (asyncError) {
-      console.log('No pending role found for Supabase sync, defaulting to student');
-    }
+    // All users are treated as regular users
+    const userRole = 'student';
 
     const userData = {
       clerk_id: clerkUser.id,
@@ -120,7 +94,7 @@ export async function syncUserWithSupabase(clerkUser: ClerkUser): Promise<void> 
       throw error;
     }
 
-    console.log(`User synced with Supabase with role ${userRole}:`, clerkUser.id);
+    console.log('User synced with Supabase:', clerkUser.id);
   } catch (error) {
     console.error('Error syncing user with Supabase:', error);
     throw new Error('Failed to sync user with Supabase');
@@ -171,7 +145,7 @@ export async function getUserData(clerkId: string) {
         name: data.name || 'User',
         email: data.email,
         avatarUrl: data.avatar_url,
-        role: data.role?.toUpperCase() || 'STUDENT', // Convert to uppercase to match enum
+        role: data.role ? data.role.toUpperCase() as 'STUDENT' | 'TEACHER' | 'ADMIN' : 'STUDENT', // Convert to uppercase to match enum
         createdAt: data.created_at,
         updatedAt: data.updated_at,
       };

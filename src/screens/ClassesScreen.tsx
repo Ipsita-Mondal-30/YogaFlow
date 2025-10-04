@@ -8,11 +8,15 @@ import {
   Alert,
   RefreshControl,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { supabase, Class } from '../services/supabase';
 import { useAuth } from '@clerk/clerk-expo';
+import { colors } from '../utils/colors';
 
 export default function ClassesScreen() {
+  const navigation = useNavigation();
   const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -33,7 +37,14 @@ export default function ClassesScreen() {
         .order('start_at', { ascending: true });
 
       if (error) throw error;
-      setClasses(data || []);
+
+      // Add type property based on is_live field
+      const classesWithType = (data || []).map(classItem => ({
+        ...classItem,
+        type: classItem.is_live ? 'live' : 'recorded'
+      }));
+
+      setClasses(classesWithType);
     } catch (error) {
       console.error('Error fetching classes:', error);
       Alert.alert('Error', 'Failed to load classes');
@@ -54,20 +65,30 @@ export default function ClassesScreen() {
       return;
     }
 
-    if (classItem.type === 'live' && classItem.meeting_link) {
+    if (classItem.type === 'live') {
       Alert.alert(
         'Join Live Class',
         `Join "${classItem.title}" with ${classItem.teacher?.name}?`,
         [
           { text: 'Cancel', style: 'cancel' },
-          { text: 'Join', onPress: () => {
-            // In a real app, you'd open the meeting link
-            Alert.alert('Success', 'Joining live class...');
-          }},
+          {
+            text: 'Join', onPress: () => {
+              // In a real app, you'd open the meeting link or video call
+              Alert.alert('Success', 'Joining live class...');
+            }
+          },
         ]
       );
+    } else if (classItem.type === 'recorded' && classItem.video_url) {
+      // Navigate to video player screen
+      (navigation as any).navigate('VideoPlayer', {
+        videoUrl: classItem.video_url,
+        title: classItem.title,
+        description: classItem.description || '',
+        teacherName: classItem.teacher?.name || 'Unknown Teacher',
+      });
     } else if (classItem.type === 'recorded') {
-      Alert.alert('Play Recording', `Playing "${classItem.title}"`);
+      Alert.alert('Error', 'Video not available for this class');
     }
   };
 
@@ -101,16 +122,19 @@ export default function ClassesScreen() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <View style={styles.header}>
+      <LinearGradient
+        colors={[colors.primary, colors.primaryLight]}
+        style={styles.header}
+      >
         <Text style={styles.title}>Yoga Classes</Text>
         <Text style={styles.subtitle}>
           Join live sessions or watch recorded classes
         </Text>
-      </View>
+      </LinearGradient>
 
       {classes.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Ionicons name="calendar-outline" size={64} color="#d1d5db" />
+          <Ionicons name="calendar-outline" size={64} color={colors.lightGray} />
           <Text style={styles.emptyTitle}>No Classes Available</Text>
           <Text style={styles.emptyText}>
             Check back soon for new classes from our teachers
@@ -144,17 +168,17 @@ export default function ClassesScreen() {
 
               <View style={styles.classDetails}>
                 <View style={styles.detailItem}>
-                  <Ionicons name="time-outline" size={16} color="#6b7280" />
+                  <Ionicons name="time-outline" size={16} color={colors.textSecondary} />
                   <Text style={styles.detailText}>
                     {classItem.duration_minutes} minutes
                   </Text>
                 </View>
-                
+
                 {classItem.type === 'live' && (
                   <View style={styles.detailItem}>
-                    <Ionicons name="calendar-outline" size={16} color="#6b7280" />
+                    <Ionicons name="calendar-outline" size={16} color={colors.textSecondary} />
                     <Text style={styles.detailText}>
-                      {formatDate(classItem.start_at)}
+                      {classItem.start_at ? formatDate(classItem.start_at) : 'TBD'}
                     </Text>
                   </View>
                 )}
@@ -163,12 +187,12 @@ export default function ClassesScreen() {
               <TouchableOpacity
                 style={[
                   styles.actionButton,
-                  classItem.type === 'live' && !isUpcoming(classItem.start_at)
+                  classItem.type === 'live' && (!classItem.start_at || !isUpcoming(classItem.start_at))
                     ? styles.disabledButton
                     : styles.enabledButton
                 ]}
                 onPress={() => handleJoinClass(classItem)}
-                disabled={classItem.type === 'live' && !isUpcoming(classItem.start_at)}
+                disabled={classItem.type === 'live' && (!classItem.start_at || !isUpcoming(classItem.start_at))}
               >
                 <Ionicons
                   name={classItem.type === 'live' ? 'videocam' : 'play'}
@@ -176,8 +200,8 @@ export default function ClassesScreen() {
                   color="white"
                 />
                 <Text style={styles.actionButtonText}>
-                  {classItem.type === 'live' 
-                    ? (isUpcoming(classItem.start_at) ? 'Join Live' : 'Class Ended')
+                  {classItem.type === 'live'
+                    ? (classItem.start_at && isUpcoming(classItem.start_at) ? 'Join Live' : 'Class Ended')
                     : 'Watch Recording'
                   }
                 </Text>
@@ -193,32 +217,34 @@ export default function ClassesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.background,
+    paddingBottom: 110,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.background,
   },
   loadingText: {
     fontSize: 16,
-    color: '#6b7280',
+    color: colors.textSecondary,
   },
   header: {
-    padding: 20,
     paddingTop: 60,
-    backgroundColor: 'white',
+    paddingBottom: 20,
+    paddingHorizontal: 20,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#065f46',
+    color: colors.textWhite,
     marginBottom: 5,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    color: colors.textWhite,
+    opacity: 0.9,
   },
   emptyContainer: {
     flex: 1,
@@ -229,13 +255,13 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#374151',
+    color: colors.textPrimary,
     marginTop: 16,
     marginBottom: 8,
   },
   emptyText: {
     fontSize: 16,
-    color: '#6b7280',
+    color: colors.textSecondary,
     textAlign: 'center',
     paddingHorizontal: 40,
   },
@@ -243,11 +269,11 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   classCard: {
-    backgroundColor: 'white',
+    backgroundColor: colors.cardBackground,
     borderRadius: 15,
     padding: 20,
     marginBottom: 15,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
@@ -265,12 +291,12 @@ const styles = StyleSheet.create({
   classTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#065f46',
+    color: colors.secondary,
     marginBottom: 5,
   },
   teacherName: {
     fontSize: 14,
-    color: '#6b7280',
+    color: colors.textSecondary,
     fontStyle: 'italic',
   },
   typeBadge: {
@@ -280,24 +306,24 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   liveBadge: {
-    backgroundColor: '#fef2f2',
+    backgroundColor: colors.accentLight,
   },
   recordedBadge: {
-    backgroundColor: '#f0f9ff',
+    backgroundColor: colors.accentLight,
   },
   typeText: {
     fontSize: 12,
     fontWeight: 'bold',
   },
   liveText: {
-    color: '#dc2626',
+    color: colors.primary,
   },
   recordedText: {
-    color: '#2563eb',
+    color: colors.primary,
   },
   description: {
     fontSize: 16,
-    color: '#374151',
+    color: colors.textPrimary,
     lineHeight: 24,
     marginBottom: 15,
   },
@@ -312,7 +338,7 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 14,
-    color: '#6b7280',
+    color: colors.textSecondary,
     marginLeft: 5,
   },
   actionButton: {
@@ -323,13 +349,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   enabledButton: {
-    backgroundColor: '#10b981',
+    backgroundColor: colors.primary,
   },
   disabledButton: {
-    backgroundColor: '#d1d5db',
+    backgroundColor: colors.lightGray,
   },
   actionButtonText: {
-    color: 'white',
+    color: colors.textWhite,
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 8,

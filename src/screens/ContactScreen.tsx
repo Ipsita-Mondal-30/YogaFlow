@@ -10,8 +10,12 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../services/supabase';
+import { colors } from '../utils/colors';
+import TexturedBackground from '../components/TexturedBackground'
+import GlassCard from '../components/GlassCard';
 
 export default function ContactScreen({ navigation }: any) {
   const [formData, setFormData] = useState({
@@ -41,7 +45,7 @@ export default function ContactScreen({ navigation }: any) {
       Alert.alert('Error', 'Please enter your message');
       return false;
     }
-    
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       Alert.alert('Error', 'Please enter a valid email address');
@@ -88,143 +92,154 @@ export default function ContactScreen({ navigation }: any) {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView style={styles.scrollContainer}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
+    <TexturedBackground variant="medium">
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView style={styles.scrollContainer}>
+          <LinearGradient
+            colors={[colors.primary, colors.primaryLight]}
+            style={styles.header}
           >
-            <Ionicons name="arrow-back" size={24} color="#065f46" />
-          </TouchableOpacity>
-          <Text style={styles.title}>Contact Us</Text>
-        </View>
-
-        <View style={styles.content}>
-          <View style={styles.introSection}>
-            <Text style={styles.introTitle}>Get in Touch</Text>
-            <Text style={styles.introText}>
-              Have questions about our classes, need guidance on your yoga journey, 
-              or want to share feedback? We'd love to hear from you.
-            </Text>
-          </View>
-
-          <View style={styles.contactInfo}>
-            <View style={styles.contactItem}>
-              <Ionicons name="location" size={24} color="#10b981" />
-              <View style={styles.contactText}>
-                <Text style={styles.contactLabel}>Location</Text>
-                <Text style={styles.contactValue}>Rishikesh, Uttarakhand, India</Text>
-              </View>
-            </View>
-
-            <View style={styles.contactItem}>
-              <Ionicons name="mail" size={24} color="#10b981" />
-              <View style={styles.contactText}>
-                <Text style={styles.contactLabel}>Email</Text>
-                <Text style={styles.contactValue}>hello@yogaflow.com</Text>
-              </View>
-            </View>
-
-            <View style={styles.contactItem}>
-              <Ionicons name="time" size={24} color="#10b981" />
-              <View style={styles.contactText}>
-                <Text style={styles.contactLabel}>Response Time</Text>
-                <Text style={styles.contactValue}>Within 24 hours</Text>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.formSection}>
-            <Text style={styles.formTitle}>Send us a Message</Text>
-            
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Name *</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.name}
-                onChangeText={(value) => handleInputChange('name', value)}
-                placeholder="Your full name"
-                placeholderTextColor="#9ca3af"
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Email *</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.email}
-                onChangeText={(value) => handleInputChange('email', value)}
-                placeholder="your.email@example.com"
-                placeholderTextColor="#9ca3af"
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Message *</Text>
-              <TextInput
-                style={[styles.input, styles.messageInput]}
-                value={formData.message}
-                onChangeText={(value) => handleInputChange('message', value)}
-                placeholder="Tell us how we can help you..."
-                placeholderTextColor="#9ca3af"
-                multiline
-                numberOfLines={5}
-                textAlignVertical="top"
-              />
-            </View>
-
             <TouchableOpacity
-              style={[styles.submitButton, loading && styles.disabledButton]}
-              onPress={handleSubmit}
-              disabled={loading}
+              style={styles.backButton}
+              onPress={() => navigation.goBack()}
             >
-              {loading ? (
-                <Text style={styles.submitButtonText}>Sending...</Text>
-              ) : (
-                <>
-                  <Ionicons name="send" size={20} color="white" />
-                  <Text style={styles.submitButtonText}>Send Message</Text>
-                </>
-              )}
+              <Ionicons name="arrow-back" size={24} color={colors.textWhite} />
             </TouchableOpacity>
+            <Text style={styles.title}>Contact Us</Text>
+          </LinearGradient>
+
+          <View style={styles.content}>
+            <GlassCard intensity="light" style={styles.introSection}>
+              <Text style={styles.introTitle}>Get in Touch</Text>
+              <Text style={styles.introText}>
+                Have questions about our classes, need guidance on your yoga journey,
+                or want to share feedback? We'd love to hear from you.
+              </Text>
+            </GlassCard>
+
+            <GlassCard intensity="medium" style={styles.contactInfo}>
+              <View style={styles.contactItem}>
+                <Ionicons name="location" size={24} color={colors.primary} />
+                <View style={styles.contactText}>
+                  <Text style={styles.contactLabel}>Location</Text>
+                  <Text style={styles.contactValue}>Rishikesh, Uttarakhand, India</Text>
+                </View>
+              </View>
+
+              <View style={styles.contactItem}>
+                <Ionicons name="mail" size={24} color={colors.primary} />
+                <View style={styles.contactText}>
+                  <Text style={styles.contactLabel}>Email</Text>
+                  <Text style={styles.contactValue}>hello@yogaflow.com</Text>
+                </View>
+              </View>
+
+              <View style={styles.contactItem}>
+                <Ionicons name="time" size={24} color={colors.primary} />
+                <View style={styles.contactText}>
+                  <Text style={styles.contactLabel}>Response Time</Text>
+                  <Text style={styles.contactValue}>Within 24 hours</Text>
+                </View>
+              </View>
+            </GlassCard>
+
+            <GlassCard intensity="strong" style={styles.formSection}>
+              <Text style={styles.formTitle}>Send us a Message</Text>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Name *</Text>
+                <TextInput
+                  style={styles.input}
+                  value={formData.name}
+                  onChangeText={(value) => handleInputChange('name', value)}
+                  placeholder="Your full name"
+                  placeholderTextColor="#9ca3af"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Email *</Text>
+                <TextInput
+                  style={styles.input}
+                  value={formData.email}
+                  onChangeText={(value) => handleInputChange('email', value)}
+                  placeholder="your.email@example.com"
+                  placeholderTextColor="#9ca3af"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Message *</Text>
+                <TextInput
+                  style={[styles.input, styles.messageInput]}
+                  value={formData.message}
+                  onChangeText={(value) => handleInputChange('message', value)}
+                  placeholder="Tell us how we can help you..."
+                  placeholderTextColor="#9ca3af"
+                  multiline
+                  numberOfLines={5}
+                  textAlignVertical="top"
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[styles.submitButton, loading && styles.disabledButton]}
+                onPress={handleSubmit}
+                disabled={loading}
+              >
+                <LinearGradient
+                  colors={[colors.primary, colors.primaryLight]}
+                  style={styles.submitGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                >
+                  {loading ? (
+                    <Text style={styles.submitButtonText}>Sending...</Text>
+                  ) : (
+                    <>
+                      <Ionicons name="send" size={20} color={colors.textWhite} />
+                      <Text style={styles.submitButtonText}>Send Message</Text>
+                    </>
+                  )}
+                </LinearGradient>
+              </TouchableOpacity>
+            </GlassCard>
+
+            <GlassCard intensity="light" style={styles.additionalInfo}>
+              <Text style={styles.additionalTitle}>Other Ways to Connect</Text>
+
+              <View style={styles.socialLinks}>
+                <TouchableOpacity style={styles.socialButton}>
+                  <Ionicons name="logo-instagram" size={24} color={colors.primary} />
+                  <Text style={styles.socialText}>Follow us on Instagram</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.socialButton}>
+                  <Ionicons name="logo-youtube" size={24} color={colors.primary} />
+                  <Text style={styles.socialText}>Subscribe to our YouTube</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.socialButton}>
+                  <Ionicons name="logo-facebook" size={24} color={colors.primary} />
+                  <Text style={styles.socialText}>Like us on Facebook</Text>
+                </TouchableOpacity>
+              </View>
+            </GlassCard>
           </View>
-
-          <View style={styles.additionalInfo}>
-            <Text style={styles.additionalTitle}>Other Ways to Connect</Text>
-            
-            <View style={styles.socialLinks}>
-              <TouchableOpacity style={styles.socialButton}>
-                <Ionicons name="logo-instagram" size={24} color="#10b981" />
-                <Text style={styles.socialText}>Follow us on Instagram</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.socialButton}>
-                <Ionicons name="logo-youtube" size={24} color="#10b981" />
-                <Text style={styles.socialText}>Subscribe to our YouTube</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.socialButton}>
-                <Ionicons name="logo-facebook" size={24} color="#10b981" />
-                <Text style={styles.socialText}>Like us on Facebook</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </TexturedBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
   },
   scrollContainer: {
     flex: 1,
@@ -234,7 +249,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     paddingTop: 60,
-    backgroundColor: 'white',
   },
   backButton: {
     marginRight: 15,
@@ -242,35 +256,31 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#065f46',
+    color: colors.textWhite,
   },
   content: {
     padding: 20,
+    paddingBottom: 120, // Add bottom padding to prevent overlap with tab bar
   },
   introSection: {
-    marginBottom: 30,
+    marginBottom: 20,
+    alignItems: 'center',
   },
   introTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#065f46',
+    color: colors.secondary,
     marginBottom: 10,
+    textAlign: 'center',
   },
   introText: {
     fontSize: 16,
-    color: '#6b7280',
+    color: colors.textPrimary,
     lineHeight: 24,
+    textAlign: 'center',
   },
   contactInfo: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 20,
-    marginBottom: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    marginBottom: 20,
   },
   contactItem: {
     flexDirection: 'row',
@@ -283,87 +293,81 @@ const styles = StyleSheet.create({
   },
   contactLabel: {
     fontSize: 14,
-    color: '#6b7280',
+    color: colors.textSecondary,
     marginBottom: 2,
   },
   contactValue: {
     fontSize: 16,
-    color: '#374151',
+    color: colors.textPrimary,
     fontWeight: '600',
   },
   formSection: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 20,
-    marginBottom: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    marginBottom: 20,
   },
   formTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#065f46',
+    color: colors.secondary,
     marginBottom: 20,
+    textAlign: 'center',
   },
   inputGroup: {
     marginBottom: 20,
   },
   inputLabel: {
     fontSize: 16,
-    color: '#374151',
+    color: colors.textPrimary,
     fontWeight: '600',
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: 'rgba(255, 255, 255, 0.3)',
     borderRadius: 10,
     paddingHorizontal: 15,
     paddingVertical: 12,
     fontSize: 16,
-    color: '#374151',
-    backgroundColor: '#f9fafb',
+    color: colors.textPrimary,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
   messageInput: {
     height: 120,
     paddingTop: 12,
   },
   submitButton: {
-    backgroundColor: '#10b981',
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginTop: 10,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  disabledButton: {
+    opacity: 0.7,
+  },
+  submitGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 15,
-    borderRadius: 10,
-    marginTop: 10,
-  },
-  disabledButton: {
-    backgroundColor: '#d1d5db',
   },
   submitButtonText: {
-    color: 'white',
+    color: colors.textWhite,
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 8,
   },
   additionalInfo: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    marginBottom: 20,
   },
   additionalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#065f46',
+    color: colors.secondary,
     marginBottom: 15,
+    textAlign: 'center',
   },
   socialLinks: {
     gap: 15,
@@ -373,12 +377,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 15,
-    backgroundColor: '#f0f9f0',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   socialText: {
     fontSize: 16,
-    color: '#065f46',
+    color: colors.textPrimary,
     fontWeight: '600',
     marginLeft: 12,
   },

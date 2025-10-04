@@ -35,6 +35,27 @@ export interface UserType {
   createdAt: Date;
 }
 
+export interface Class {
+  id: string;
+  title: string;
+  description?: string;
+  teacher_id: string;
+  type: 'live' | 'recorded';
+  start_at?: string;
+  duration_minutes: number;
+  video_url?: string;
+  thumbnail_url?: string;
+  meeting_link?: string;
+  price?: number;
+  level?: 'beginner' | 'intermediate' | 'advanced';
+  created_at: string;
+  teacher?: {
+    name: string;
+    email: string;
+  };
+}
+
+// Keep the old interface for backward compatibility
 export interface ClassModel {
   id: string;
   title: string;
@@ -61,12 +82,13 @@ export interface VideoType {
 export interface AsanaType {
   id: string;
   name: string;
-  description?: string;
-  difficulty: AsanaDifficulty;
-  instructions?: string;
-  benefits?: string;
-  imageUrl?: string;
-  createdAt: Date;
+  sanskrit_name: string;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  steps: string;
+  benefits: string;
+  precautions: string;
+  image_url?: string;
+  created_at: string;
 }
 
 export interface BlogPostType {
@@ -74,11 +96,15 @@ export interface BlogPostType {
   title: string;
   slug: string;
   content: string;
-  authorId: string;
-  tags?: string[];
-  publishedAt?: Date;
-  featuredImage?: string;
-  createdAt: Date;
+  author_id: string;
+  tags: string[];
+  published_at: string;
+  featured_image?: string;
+  created_at: string;
+  author?: {
+    name: string;
+    email: string;
+  };
 }
 
 export interface MessageType {
@@ -96,3 +122,11 @@ export interface ContactMessageType {
   message: string;
   createdAt: Date;
 }
+
+// Type aliases for backward compatibility
+export type User = UserType;
+export type Video = VideoType;
+export type Asana = AsanaType;
+export type BlogPost = BlogPostType;
+export type Message = MessageType;
+export type ContactMessage = ContactMessageType;

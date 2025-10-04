@@ -1,7 +1,10 @@
 import React, { useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import LottieView from 'lottie-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { colors } from '../utils/colors';
 
 const { width, height } = Dimensions.get('window');
 
@@ -28,8 +31,14 @@ export default function OnboardingScreen({ navigation, onOnboardingComplete }: O
   };
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={[colors.background, colors.white]}
+      style={styles.container}
+    >
       <View style={styles.animationContainer}>
+        <View style={styles.logoCircle}>
+          <Ionicons name="flower" size={60} color={colors.primary} />
+        </View>
         <LottieView
           ref={animationRef}
           source={require('../assets/onboarding-animation.json')}
@@ -49,26 +58,47 @@ export default function OnboardingScreen({ navigation, onOnboardingComplete }: O
         </Text>
         
         <TouchableOpacity style={styles.button} onPress={handleStartFlow}>
-          <Text style={styles.buttonText}>Start Your Flow</Text>
+          <LinearGradient
+            colors={[colors.primary, colors.primaryLight]}
+            style={styles.buttonGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          >
+            <Text style={styles.buttonText}>Start Your Flow</Text>
+          </LinearGradient>
         </TouchableOpacity>
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f9f0',
   },
   animationContainer: {
     flex: 2,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingTop: 60,
+  },
+  logoCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 40,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 12,
   },
   animation: {
-    width: width * 0.8,
-    height: height * 0.4,
+    width: width * 0.6,
+    height: height * 0.3,
   },
   content: {
     flex: 1,
@@ -77,39 +107,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: 'bold',
-    color: '#065f46',
-    marginBottom: 10,
+    color: colors.secondary,
+    marginBottom: 12,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 18,
-    color: '#047857',
-    marginBottom: 10,
+    fontSize: 20,
+    color: colors.primary,
+    marginBottom: 12,
     textAlign: 'center',
     fontWeight: '600',
   },
   description: {
     fontSize: 16,
-    color: '#6b7280',
-    marginBottom: 40,
+    color: colors.textSecondary,
+    marginBottom: 50,
     textAlign: 'center',
     lineHeight: 24,
   },
   button: {
-    backgroundColor: '#10b981',
-    paddingHorizontal: 40,
-    paddingVertical: 15,
-    borderRadius: 25,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    borderRadius: 30,
+    overflow: 'hidden',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  buttonGradient: {
+    paddingHorizontal: 50,
+    paddingVertical: 18,
+    alignItems: 'center',
   },
   buttonText: {
-    color: 'white',
+    color: colors.textWhite,
     fontSize: 18,
     fontWeight: 'bold',
   },
