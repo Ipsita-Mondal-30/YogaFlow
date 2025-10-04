@@ -9,8 +9,10 @@ import {
   Alert,
   RefreshControl,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase, BlogPost } from '../services/supabase';
+import { colors } from '../utils/colors';
 
 export default function BlogScreen() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -91,7 +93,7 @@ export default function BlogScreen() {
 
         <View style={styles.postContent}>
           <Text style={styles.postTitle}>{selectedPost.title}</Text>
-          
+
           <View style={styles.postMeta}>
             <Text style={styles.authorName}>
               By {selectedPost.author?.name || 'Unknown Author'}
@@ -103,7 +105,7 @@ export default function BlogScreen() {
 
           {selectedPost.tags && selectedPost.tags.length > 0 && (
             <View style={styles.tagsContainer}>
-              {selectedPost.tags.map((tag, index) => (
+              {selectedPost.tags.map((tag: string, index: number) => (
                 <View key={index} style={styles.tag}>
                   <Text style={styles.tagText}>{tag}</Text>
                 </View>
@@ -134,12 +136,15 @@ export default function BlogScreen() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <View style={styles.header}>
+      <LinearGradient
+        colors={[colors.primary, colors.primaryLight]}
+        style={styles.header}
+      >
         <Text style={styles.title}>Yoga Wisdom</Text>
         <Text style={styles.subtitle}>
           Insights, research, and ancient wisdom for modern practitioners
         </Text>
-      </View>
+      </LinearGradient>
 
       {posts.length === 0 ? (
         <View style={styles.emptyContainer}>
@@ -163,12 +168,12 @@ export default function BlogScreen() {
                   style={styles.postThumbnail}
                 />
               )}
-              
+
               <View style={styles.postCardContent}>
                 <Text style={styles.postCardTitle} numberOfLines={2}>
                   {post.title}
                 </Text>
-                
+
                 <View style={styles.postCardMeta}>
                   <Text style={styles.postCardAuthor}>
                     {post.author?.name || 'Unknown Author'}
@@ -180,7 +185,7 @@ export default function BlogScreen() {
 
                 {post.tags && post.tags.length > 0 && (
                   <View style={styles.postCardTags}>
-                    {post.tags.slice(0, 3).map((tag, index) => (
+                    {post.tags.slice(0, 3).map((tag: string, index: number) => (
                       <View key={index} style={styles.smallTag}>
                         <Text style={styles.smallTagText}>{tag}</Text>
                       </View>
@@ -204,7 +209,8 @@ export default function BlogScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.background,
+    paddingBottom: 110,
   },
   centerContainer: {
     flex: 1,
@@ -217,20 +223,21 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   header: {
-    padding: 20,
     paddingTop: 60,
-    backgroundColor: 'white',
+    paddingBottom: 20,
+    paddingHorizontal: 20,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#065f46',
+    color: colors.textWhite,
     marginBottom: 5,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    color: colors.textWhite,
     lineHeight: 24,
+    opacity: 0.9,
   },
   emptyContainer: {
     flex: 1,
