@@ -168,22 +168,22 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
               <ProfileItem
                 icon="play-circle-outline"
                 label="Total Classes"
-                value="18 classes"
+                value="No classes uploaded yet"
               />
               <ProfileItem
                 icon="people-outline"
                 label="Total Students"
-                value="245 students"
+                value="No students enrolled yet"
               />
               <ProfileItem
                 icon="star-outline"
                 label="Average Rating"
-                value="4.8 stars"
+                value="No ratings yet"
               />
               <ProfileItem
                 icon="card-outline"
                 label="Total Earnings"
-                value="$3,420"
+                value="$0.00"
               />
             </View>
           </View>
@@ -196,22 +196,22 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
               <ProfileItem
                 icon="play-circle-outline"
                 label="Classes Completed"
-                value="24 classes"
+                value="No classes completed yet"
               />
               <ProfileItem
                 icon="flame-outline"
                 label="Current Streak"
-                value="7 days"
+                value="Start your first class!"
               />
               <ProfileItem
                 icon="trophy-outline"
                 label="Achievements"
-                value="5 badges earned"
+                value="No achievements yet"
               />
               <ProfileItem
                 icon="time-outline"
                 label="Total Practice Time"
-                value="36 hours"
+                value="0 minutes"
               />
             </View>
           </View>

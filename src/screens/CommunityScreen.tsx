@@ -11,11 +11,19 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { supabase, Message } from '../services/supabase';
+import { supabase, MessageType } from '../services/supabase';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 
+// Extended message type with sender info
+type MessageWithSender = MessageType & {
+  sender?: {
+    name: string;
+    email: string;
+  };
+};
+
 export default function CommunityScreen() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<MessageWithSender[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [currentRoom, setCurrentRoom] = useState('general');
@@ -108,6 +116,7 @@ export default function CommunityScreen() {
             clerk_id: user.id,
             name: user.fullName || user.firstName || 'Anonymous',
             email: user.primaryEmailAddress?.emailAddress || '',
+            role: 'student', // Default role
           })
           .select('id')
           .single();
@@ -219,7 +228,7 @@ export default function CommunityScreen() {
                   {message.sender?.name || 'Anonymous'}
                 </Text>
                 <Text style={styles.messageTime}>
-                  {formatTime(message.created_at)}
+                  {formatTime(message.createdAt.toString())}
                 </Text>
               </View>
               <Text style={styles.messageContent}>{message.content}</Text>

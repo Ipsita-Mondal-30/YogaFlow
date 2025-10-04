@@ -99,11 +99,10 @@ export async function syncUserWithSupabase(clerkUser: ClerkUser): Promise<void> 
     }
 
     const userData = {
-      id: clerkUser.id, // Use Clerk ID as primary key
+      clerk_id: clerkUser.id,
       email: clerkUser.emailAddresses[0]?.emailAddress || '',
-      first_name: clerkUser.firstName || null,
-      last_name: clerkUser.lastName || null,
-      profile_image_url: clerkUser.imageUrl || null,
+      name: clerkUser.fullName || `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || 'User',
+      avatar_url: clerkUser.imageUrl || null,
       role: userRole,
       updated_at: new Date().toISOString(),
     };
@@ -112,7 +111,7 @@ export async function syncUserWithSupabase(clerkUser: ClerkUser): Promise<void> 
     const { error } = await supabase
       .from('users')
       .upsert(userData, {
-        onConflict: 'id',
+        onConflict: 'clerk_id',
         ignoreDuplicates: false,
       });
 
@@ -148,11 +147,37 @@ export async function syncUserData(clerkUser: ClerkUser): Promise<void> {
 }
 
 /**
- * Get user data from Prisma by Clerk ID
+ * Get user data from Supabase by Clerk ID
  */
 export async function getUserData(clerkId: string) {
   try {
-    return await DatabaseService.getUserByClerkId(clerkId);
+    // Fetch from Supabase since Prisma is using mock implementation
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('clerk_id', clerkId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching user data from Supabase:', error);
+      return null;
+    }
+
+    // Convert Supabase data format to match expected format
+    if (data) {
+      return {
+        id: data.id,
+        clerkId: data.clerk_id,
+        name: data.name || 'User',
+        email: data.email,
+        avatarUrl: data.avatar_url,
+        role: data.role?.toUpperCase() || 'STUDENT', // Convert to uppercase to match enum
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+      };
+    }
+
+    return null;
   } catch (error) {
     console.error('Error fetching user data:', error);
     return null;

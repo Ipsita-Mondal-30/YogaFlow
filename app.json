@@ -8,7 +8,7 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/yoga.png",
       "resizeMode": "contain",
       "backgroundColor": "#f0f9f0"
     },
@@ -21,7 +21,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/yoga.png",
         "backgroundColor": "#f0f9f0"
       },
       "edgeToEdgeEnabled": true,
@@ -29,7 +29,7 @@
       "package": "com.yogaflow.app"
     },
     "web": {
-      "favicon": "./assets/favicon.png",
+      "favicon": "./assets/yoga.png",
       "bundler": "metro"
     },
     "plugins": [

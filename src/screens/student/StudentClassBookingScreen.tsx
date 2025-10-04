@@ -40,67 +40,8 @@ const StudentClassBookingScreen: React.FC = () => {
   const [selectedClass, setSelectedClass] = useState<YogaClass | null>(null);
   const [selectedSchedule, setSelectedSchedule] = useState<string>('');
 
-  // Mock data for available classes
-  const availableClasses: YogaClass[] = [
-    {
-      id: '1',
-      title: 'Morning Flow',
-      instructor: 'Sarah Johnson',
-      duration: 60,
-      difficulty: 'Beginner',
-      category: 'Vinyasa',
-      price: 25,
-      rating: 4.8,
-      studentsEnrolled: 12,
-      maxStudents: 20,
-      description: 'Start your day with gentle flowing movements and mindful breathing.',
-      schedule: [
-        { date: '2024-01-15', time: '07:00 AM' },
-        { date: '2024-01-16', time: '07:00 AM' },
-        { date: '2024-01-17', time: '07:00 AM' },
-      ],
-      thumbnail: 'https://via.placeholder.com/300x200',
-      isBookmarked: false,
-    },
-    {
-      id: '2',
-      title: 'Power Yoga',
-      instructor: 'Mike Chen',
-      duration: 75,
-      difficulty: 'Advanced',
-      category: 'Power',
-      price: 35,
-      rating: 4.9,
-      studentsEnrolled: 8,
-      maxStudents: 15,
-      description: 'High-intensity yoga practice to build strength and endurance.',
-      schedule: [
-        { date: '2024-01-15', time: '06:00 PM' },
-        { date: '2024-01-17', time: '06:00 PM' },
-      ],
-      thumbnail: 'https://via.placeholder.com/300x200',
-      isBookmarked: true,
-    },
-    {
-      id: '3',
-      title: 'Restorative Evening',
-      instructor: 'Emma Wilson',
-      duration: 90,
-      difficulty: 'Beginner',
-      category: 'Restorative',
-      price: 30,
-      rating: 4.7,
-      studentsEnrolled: 15,
-      maxStudents: 18,
-      description: 'Gentle, relaxing practice perfect for unwinding after a long day.',
-      schedule: [
-        { date: '2024-01-16', time: '07:30 PM' },
-        { date: '2024-01-18', time: '07:30 PM' },
-      ],
-      thumbnail: 'https://via.placeholder.com/300x200',
-      isBookmarked: false,
-    },
-  ];
+  // Real data for available classes - empty for new platform
+  const availableClasses: YogaClass[] = [];
 
   const categories = ['All', 'Vinyasa', 'Hatha', 'Power', 'Yin', 'Restorative'];
   const difficulties = ['All', 'Beginner', 'Intermediate', 'Advanced'];
