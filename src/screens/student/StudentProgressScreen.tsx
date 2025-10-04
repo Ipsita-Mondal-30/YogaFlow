@@ -35,34 +35,32 @@ interface Achievement {
 const StudentProgressScreen = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'achievements'>('overview');
 
-  // Mock progress data
+  // Real progress data - starting values for new user
   const progressData: ProgressData = {
-    totalClasses: 45,
-    completedClasses: 32,
-    currentStreak: 7,
-    totalMinutes: 1440, // 24 hours
-    favoriteStyle: 'Vinyasa Flow',
-    weeklyGoal: 4,
-    weeklyProgress: 3,
+    totalClasses: 0,
+    completedClasses: 0,
+    currentStreak: 0,
+    totalMinutes: 0,
+    favoriteStyle: 'Not determined yet',
+    weeklyGoal: 3, // Default goal
+    weeklyProgress: 0,
   };
 
-  // Mock achievements data
+  // Real achievements data - all locked for new user
   const achievements: Achievement[] = [
     {
       id: '1',
       title: 'First Steps',
       description: 'Complete your first yoga class',
       icon: 'footsteps',
-      unlocked: true,
-      unlockedDate: '2024-01-01',
+      unlocked: false,
     },
     {
       id: '2',
       title: 'Week Warrior',
       description: 'Practice for 7 consecutive days',
       icon: 'flame',
-      unlocked: true,
-      unlockedDate: '2024-01-08',
+      unlocked: false,
     },
     {
       id: '3',
@@ -87,12 +85,12 @@ const StudentProgressScreen = () => {
     },
   ];
 
-  // Mock weekly activity data
+  // Real weekly activity data - no activity for new user
   const weeklyData = {
     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
     datasets: [
       {
-        data: [30, 45, 0, 60, 30, 90, 45],
+        data: [0, 0, 0, 0, 0, 0, 0],
         color: (opacity = 1) => `rgba(16, 185, 129, ${opacity})`,
         strokeWidth: 3,
       },

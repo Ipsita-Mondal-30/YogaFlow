@@ -25,21 +25,17 @@ interface AnalyticsData {
 const TeacherAnalyticsScreen: React.FC = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
 
-  // Mock analytics data
+  // Real analytics data - starting values for new teacher
   const analyticsData: AnalyticsData = {
-    totalStudents: 245,
-    totalClasses: 18,
-    totalRevenue: 3420,
-    avgRating: 4.8,
-    monthlyStudents: [45, 52, 48, 61, 55, 67, 72, 68, 75, 82, 78, 85],
+    totalStudents: 0,
+    totalClasses: 0,
+    totalRevenue: 0,
+    avgRating: 0,
+    monthlyStudents: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     classPopularity: [
-      { name: 'Vinyasa', population: 35, color: '#6B73FF', legendFontColor: '#333', legendFontSize: 12 },
-      { name: 'Hatha', population: 25, color: '#FF6B9D', legendFontColor: '#333', legendFontSize: 12 },
-      { name: 'Yin', population: 20, color: '#4ECDC4', legendFontColor: '#333', legendFontSize: 12 },
-      { name: 'Power', population: 15, color: '#FFE66D', legendFontColor: '#333', legendFontSize: 12 },
-      { name: 'Restorative', population: 5, color: '#FF8B94', legendFontColor: '#333', legendFontSize: 12 },
+      { name: 'No classes yet', population: 100, color: '#E5E7EB', legendFontColor: '#6B7280', legendFontSize: 12 },
     ],
-    weeklyRevenue: [280, 320, 450, 380, 520, 480, 420],
+    weeklyRevenue: [0, 0, 0, 0, 0, 0, 0],
   };
 
   const chartConfig = {

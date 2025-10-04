@@ -26,38 +26,8 @@ const TeacherClassesScreen = () => {
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'completed'>('upcoming');
 
-  // Mock data - in real app, this would come from API
-  const mockClasses: ClassItem[] = [
-    {
-      id: '1',
-      title: 'Morning Vinyasa Flow',
-      type: 'LIVE',
-      status: 'SCHEDULED',
-      date: '2024-01-15T08:00:00Z',
-      duration: 60,
-      studentsEnrolled: 12,
-      maxStudents: 20,
-    },
-    {
-      id: '2',
-      title: 'Beginner Hatha Yoga',
-      type: 'RECORDED',
-      status: 'COMPLETED',
-      date: '2024-01-10T10:00:00Z',
-      duration: 45,
-      studentsEnrolled: 25,
-    },
-    {
-      id: '3',
-      title: 'Advanced Ashtanga',
-      type: 'LIVE',
-      status: 'SCHEDULED',
-      date: '2024-01-20T18:00:00Z',
-      duration: 90,
-      studentsEnrolled: 8,
-      maxStudents: 15,
-    },
-  ];
+  // Real data - empty for new teacher
+  const mockClasses: ClassItem[] = [];
 
   const upcomingClasses = mockClasses.filter(c => c.status === 'SCHEDULED');
   const completedClasses = mockClasses.filter(c => c.status === 'COMPLETED');
