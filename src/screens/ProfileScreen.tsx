@@ -1,57 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
-  Image,
   ScrollView,
+  TouchableOpacity,
+  StyleSheet,
   Alert,
-  ActivityIndicator,
+  Image,
+  Modal,
+  SafeAreaView,
 } from 'react-native';
-import { useAuth, useUser } from '@clerk/clerk-expo';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { getUserData } from '../services/userSync';
-import { useUserRole } from '../hooks/useUserRole';
+import { useAuth, useUser } from '@clerk/clerk-expo';
+import { colors } from '../utils/colors';
 
-interface ProfileScreenProps {
-  navigation: any;
-}
-
-export default function ProfileScreen({ navigation }: ProfileScreenProps) {
+export default function ProfileScreen({ navigation }: any) {
   const { signOut } = useAuth();
   const { user } = useUser();
-  const { userRole } = useUserRole();
-  const [userData, setUserData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [showAbout, setShowAbout] = useState(false);
 
-  useEffect(() => {
-    loadUserData();
-  }, [user]);
-
-  const loadUserData = async () => {
-    if (user) {
-      try {
-        const data = await getUserData(user.id);
-        setUserData(data);
-      } catch (error) {
-        console.error('Error loading user data:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     Alert.alert(
       'Sign Out',
       'Are you sure you want to sign out?',
       [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
+        { text: 'Cancel', style: 'cancel' },
         {
           text: 'Sign Out',
           style: 'destructive',
@@ -60,7 +34,6 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
               await signOut();
             } catch (error) {
               console.error('Error signing out:', error);
-              Alert.alert('Error', 'Failed to sign out. Please try again.');
             }
           },
         },
@@ -68,235 +41,155 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
     );
   };
 
-  const ProfileItem = ({ 
-    icon, 
-    label, 
-    value, 
-    onPress 
-  }: { 
-    icon: string; 
-    label: string; 
-    value?: string; 
-    onPress?: () => void; 
-  }) => (
-    <TouchableOpacity style={styles.profileItem} onPress={onPress}>
-      <View style={styles.profileItemLeft}>
-        <Ionicons name={icon as any} size={24} color="#10b981" />
-        <View style={styles.profileItemText}>
-          <Text style={styles.profileItemLabel}>{label}</Text>
-          {value && <Text style={styles.profileItemValue}>{value}</Text>}
-        </View>
-      </View>
-      {onPress && (
-        <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
-      )}
-    </TouchableOpacity>
-  );
-
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#10b981" />
-          <Text style={styles.loadingText}>Loading profile...</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
+  const menuItems = [
+    {
+      icon: 'person-outline',
+      title: 'Edit Profile',
+      subtitle: 'Update your personal information',
+      onPress: () => navigation.navigate('EditProfile'),
+    },
+    {
+      icon: 'information-circle-outline',
+      title: 'About Yoga Flow',
+      subtitle: 'Learn more about Yoga Flow',
+      onPress: () => setShowAbout(true),
+    },
+  ];
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#374151" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Profile</Text>
-        <View style={styles.headerRight} />
-      </View>
-
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Profile Header */}
-        <View style={styles.profileHeader}>
+      <ScrollView style={styles.scrollView}>
+      <LinearGradient
+        colors={[colors.primary, colors.primaryLight]}
+        style={styles.header}
+      >
+        <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
             {user?.imageUrl ? (
               <Image source={{ uri: user.imageUrl }} style={styles.avatar} />
             ) : (
               <View style={styles.avatarPlaceholder}>
-                <Ionicons name="person" size={40} color="#10b981" />
+                <Ionicons name="person" size={40} color={colors.primary} />
               </View>
             )}
           </View>
           <Text style={styles.userName}>
-            {user?.firstName} {user?.lastName}
+            {user?.fullName || user?.firstName || 'Yoga Practitioner'}
           </Text>
-          <Text style={styles.userEmail}>{user?.emailAddresses[0]?.emailAddress}</Text>
-          <View style={styles.userRole}>
-            <Text style={styles.userRoleText}>{userData?.role || 'Student'}</Text>
+          <Text style={styles.userEmail}>
+            {user?.primaryEmailAddress?.emailAddress || 'Welcome to Yoga Flow'}
+          </Text>
+        </View>
+      </LinearGradient>
+
+      <View style={styles.content}>
+        <View style={styles.statsContainer}>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>0</Text>
+            <Text style={styles.statLabel}>Classes</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>0</Text>
+            <Text style={styles.statLabel}>Hours</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>0</Text>
+            <Text style={styles.statLabel}>Streak</Text>
           </View>
         </View>
 
-        {/* Profile Information */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account Information</Text>
-          <View style={styles.sectionContent}>
-            <ProfileItem
-              icon="person-outline"
-              label="Full Name"
-              value={`${user?.firstName || ''} ${user?.lastName || ''}`.trim()}
-            />
-            <ProfileItem
-              icon="mail-outline"
-              label="Email"
-              value={user?.emailAddresses[0]?.emailAddress}
-            />
-            <ProfileItem
-              icon="calendar-outline"
-              label="Member Since"
-              value={userData?.createdAt ? new Date(userData.createdAt).toLocaleDateString() : 'N/A'}
-            />
-          </View>
+        <View style={styles.menuContainer}>
+          {menuItems.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.menuItem}
+              onPress={item.onPress}
+            >
+              <View style={styles.menuIconContainer}>
+                <Ionicons name={item.icon as any} size={24} color={colors.primary} />
+              </View>
+              <View style={styles.menuTextContainer}>
+                <Text style={styles.menuTitle}>{item.title}</Text>
+                <Text style={styles.menuSubtitle}>{item.subtitle}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={colors.gray} />
+            </TouchableOpacity>
+          ))}
         </View>
 
-        {/* Role-specific Stats */}
-        {userRole === 'TEACHER' && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Teaching Stats</Text>
-            <View style={styles.sectionContent}>
-              <ProfileItem
-                icon="play-circle-outline"
-                label="Total Classes"
-                value="No classes uploaded yet"
-              />
-              <ProfileItem
-                icon="people-outline"
-                label="Total Students"
-                value="No students enrolled yet"
-              />
-              <ProfileItem
-                icon="star-outline"
-                label="Average Rating"
-                value="No ratings yet"
-              />
-              <ProfileItem
-                icon="card-outline"
-                label="Total Earnings"
-                value="$0.00"
-              />
-            </View>
-          </View>
-        )}
-
-        {userRole === 'STUDENT' && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Your Progress</Text>
-            <View style={styles.sectionContent}>
-              <ProfileItem
-                icon="play-circle-outline"
-                label="Classes Completed"
-                value="No classes completed yet"
-              />
-              <ProfileItem
-                icon="flame-outline"
-                label="Current Streak"
-                value="Start your first class!"
-              />
-              <ProfileItem
-                icon="trophy-outline"
-                label="Achievements"
-                value="No achievements yet"
-              />
-              <ProfileItem
-                icon="time-outline"
-                label="Total Practice Time"
-                value="0 minutes"
-              />
-            </View>
-          </View>
-        )}
-
-        {/* Role-specific Actions */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{userRole === 'TEACHER' ? 'Teacher Tools' : 'Quick Actions'}</Text>
-          <View style={styles.sectionContent}>
-            {userRole === 'TEACHER' ? (
-              <>
-                <ProfileItem
-                  icon="cloud-upload-outline"
-                  label="Upload New Class"
-                  onPress={() => Alert.alert('Coming Soon', 'Class upload feature will be available soon.')}
-                />
-                <ProfileItem
-                  icon="analytics-outline"
-                  label="View Analytics"
-                  onPress={() => Alert.alert('Coming Soon', 'Analytics dashboard will be available soon.')}
-                />
-                <ProfileItem
-                  icon="calendar-outline"
-                  label="Manage Schedule"
-                  onPress={() => Alert.alert('Coming Soon', 'Schedule management will be available soon.')}
-                />
-              </>
-            ) : (
-              <>
-                <ProfileItem
-                  icon="calendar-outline"
-                  label="Book a Class"
-                  onPress={() => Alert.alert('Coming Soon', 'Class booking will be available soon.')}
-                />
-                <ProfileItem
-                  icon="heart-outline"
-                  label="Favorite Classes"
-                  onPress={() => Alert.alert('Coming Soon', 'Favorites feature will be available soon.')}
-                />
-                <ProfileItem
-                  icon="download-outline"
-                  label="Offline Classes"
-                  onPress={() => Alert.alert('Coming Soon', 'Offline downloads will be available soon.')}
-                />
-              </>
-            )}
-          </View>
-        </View>
-
-        {/* App Settings */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Settings</Text>
-          <View style={styles.sectionContent}>
-            <ProfileItem
-              icon="notifications-outline"
-              label="Notifications"
-              onPress={() => Alert.alert('Coming Soon', 'Notification settings will be available soon.')}
-            />
-            <ProfileItem
-              icon="shield-outline"
-              label="Privacy"
-              onPress={() => Alert.alert('Coming Soon', 'Privacy settings will be available soon.')}
-            />
-            <ProfileItem
-              icon="help-circle-outline"
-              label="Help & Support"
-              onPress={() => navigation.navigate('Contact')}
-            />
-          </View>
-        </View>
-
-        {/* Sign Out */}
-        <View style={styles.section}>
-          <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-            <Ionicons name="log-out-outline" size={24} color="#ef4444" />
+        <View style={styles.spacer} />
+        
+        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+          <LinearGradient
+            colors={[colors.error, '#C0392B']}
+            style={styles.signOutGradient}
+          >
+            <Ionicons name="log-out-outline" size={20} color={colors.textWhite} />
             <Text style={styles.signOutText}>Sign Out</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* App Info */}
-        <View style={styles.appInfo}>
-          <Text style={styles.appInfoText}>Yoga Flow v1.0.0</Text>
-          <Text style={styles.appInfoText}>Made with ❤️ for your wellness journey</Text>
-        </View>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
       </ScrollView>
+
+      {/* About Modal */}
+      <Modal
+        visible={showAbout}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowAbout(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={() => setShowAbout(false)}>
+              <Ionicons name="close" size={24} color={colors.textPrimary} />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>About Yoga Flow</Text>
+            <View style={styles.placeholder} />
+          </View>
+          
+          <ScrollView style={styles.modalContent}>
+            <View style={styles.aboutHeader}>
+              <Text style={styles.aboutEmoji}>🧘‍♀️</Text>
+              <Text style={styles.aboutTitle}>About Yoga Flow</Text>
+              <Text style={styles.aboutSubtitle}>Bringing the Soul of Rishikesh to the World</Text>
+            </View>
+            
+            <Text style={styles.aboutDescription}>
+              Yoga Flow is more than just an online yoga platform — it's a movement to reconnect the world with authentic yoga, taught by certified instructors from Rishikesh, the Yoga Capital of the World.
+            </Text>
+            
+            <Text style={styles.aboutDescription}>
+              We believe yoga is not just a workout — it's a way of life. And at Yoga Flow, we're committed to preserving its purity while making it accessible to anyone, anywhere.
+            </Text>
+            
+            <View style={styles.storySection}>
+              <Text style={styles.storyTitle}>🌱 Our Story</Text>
+              <Text style={styles.storyText}>
+                It all began with a vision:
+              </Text>
+              <Text style={styles.storyText}>
+                What if the peace and wisdom of Rishikesh could reach living rooms across the globe?
+              </Text>
+              <Text style={styles.storyText}>
+                After witnessing the global shift toward mental, physical, and emotional well-being — especially during the pandemic — we realized people needed more than just fitness videos. They needed real yoga, taught with heart.
+              </Text>
+              <Text style={styles.storyText}>
+                So we created Yoga Flow — a space where certified teachers from Rishikesh guide students through live online sessions, provide recorded classes, and offer a connected community via Telegram — all supported by a simple, peaceful, and intuitive platform.
+              </Text>
+            </View>
+            
+            <View style={styles.uniqueSection}>
+              <Text style={styles.uniqueTitle}>🧘‍♀️ What Makes Yoga Flow Unique</Text>
+              <View style={styles.uniquePoint}>
+                <Text style={styles.uniqueLabel}>• Rooted in Rishikesh:</Text>
+                <Text style={styles.uniqueDescription}> All our instructors are certified professionals from the spiritual home of yoga.</Text>
+              </View>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -304,164 +197,246 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.background,
+  },
+  scrollView: {
+    flex: 1,
+    paddingBottom: 120, // Reduced padding to prevent overlap with tab bar
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#374151',
-  },
-  headerRight: {
-    width: 40,
-  },
-  content: {
-    flex: 1,
+    paddingTop: 60,
+    paddingBottom: 30,
     paddingHorizontal: 20,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
+  profileSection: {
     alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#6b7280',
-  },
-  profileHeader: {
-    alignItems: 'center',
-    paddingVertical: 30,
   },
   avatarContainer: {
-    marginBottom: 15,
+    marginBottom: 16,
   },
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 3,
+    borderColor: colors.white,
   },
   avatarPlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#ecfdf5',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.white,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 3,
+    borderColor: colors.white,
   },
   userName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#374151',
-    marginBottom: 5,
+    color: colors.textWhite,
+    marginBottom: 4,
   },
   userEmail: {
     fontSize: 16,
-    color: '#6b7280',
-    marginBottom: 10,
+    color: colors.textWhite,
+    opacity: 0.9,
   },
-  userRole: {
-    backgroundColor: '#ecfdf5',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingBottom: 20, // Add bottom padding to prevent content overlap
   },
-  userRoleText: {
+  statsContainer: {
+    flexDirection: 'row',
+    backgroundColor: colors.cardBackground,
+    borderRadius: 15,
+    padding: 20,
+    marginTop: -15,
+    marginBottom: 30,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: colors.primary,
+    marginBottom: 4,
+  },
+  statLabel: {
     fontSize: 14,
-    color: '#10b981',
+    color: colors.textSecondary,
     fontWeight: '600',
   },
-  section: {
-    marginBottom: 25,
+  statDivider: {
+    width: 1,
+    backgroundColor: colors.lightGray,
+    marginHorizontal: 20,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#374151',
-    marginBottom: 15,
-  },
-  sectionContent: {
-    backgroundColor: '#ffffff',
+  menuContainer: {
+    backgroundColor: colors.cardBackground,
     borderRadius: 15,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    marginBottom: 30,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  profileItem: {
+  menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    paddingVertical: 16,
     paddingHorizontal: 20,
-    paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
+    borderBottomColor: colors.lightGray,
   },
-  profileItemLeft: {
-    flexDirection: 'row',
+  menuIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.accentLight,
+    justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 16,
+  },
+  menuTextContainer: {
     flex: 1,
   },
-  profileItemText: {
-    marginLeft: 15,
-    flex: 1,
-  },
-  profileItemLabel: {
+  menuTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#374151',
+    color: colors.textPrimary,
+    marginBottom: 2,
   },
-  profileItemValue: {
+  menuSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
-    marginTop: 2,
+    color: colors.textSecondary,
   },
   signOutButton: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 30,
+    shadowColor: colors.error,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  signOutGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 15,
-    paddingVertical: 15,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    paddingVertical: 16,
   },
   signOutText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#ef4444',
-    marginLeft: 10,
+    fontWeight: 'bold',
+    color: colors.textWhite,
+    marginLeft: 8,
   },
-  appInfo: {
+  spacer: {
+    height: 40,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.lightGray,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.textPrimary,
+  },
+  placeholder: {
+    width: 24,
+  },
+  modalContent: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  aboutHeader: {
     alignItems: 'center',
     paddingVertical: 30,
   },
-  appInfoText: {
-    fontSize: 14,
-    color: '#9ca3af',
-    marginBottom: 5,
+  aboutEmoji: {
+    fontSize: 60,
+    marginBottom: 16,
+  },
+  aboutTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: colors.textPrimary,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  aboutSubtitle: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  aboutDescription: {
+    fontSize: 16,
+    color: colors.textPrimary,
+    lineHeight: 24,
+    marginBottom: 20,
+    textAlign: 'justify',
+  },
+  storySection: {
+    marginTop: 20,
+    marginBottom: 30,
+  },
+  storyTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.primary,
+    marginBottom: 16,
+  },
+  storyText: {
+    fontSize: 16,
+    color: colors.textPrimary,
+    lineHeight: 24,
+    marginBottom: 12,
+    textAlign: 'justify',
+  },
+  uniqueSection: {
+    marginBottom: 40,
+  },
+  uniqueTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.primary,
+    marginBottom: 16,
+  },
+  uniquePoint: {
+    flexDirection: 'row',
+    marginBottom: 12,
+  },
+  uniqueLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.textPrimary,
+  },
+  uniqueDescription: {
+    fontSize: 16,
+    color: colors.textPrimary,
+    flex: 1,
+    lineHeight: 24,
   },
 });

@@ -1,26 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
   TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
   Alert,
-  ActivityIndicator,
+  Dimensions,
+  Image,
 } from 'react-native';
-import { useSignIn } from '@clerk/clerk-expo';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useSignIn, useOAuth } from '@clerk/clerk-expo';
+import * as WebBrowser from 'expo-web-browser';
+import { colors } from '../utils/colors';
+import TexturedBackground from '../components/TexturedBackground';
+import GlassCard from '../components/GlassCard';
+
+WebBrowser.maybeCompleteAuthSession();
+
+// Warm up browser for better OAuth performance (native only)
+const useWarmUpBrowser = () => {
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      void WebBrowser.warmUpAsync();
+      return () => {
+        void WebBrowser.coolDownAsync();
+      };
+    }
+  }, []);
+};
+
+const { width, height } = Dimensions.get('window');
 
 interface SignInScreenProps {
   navigation: any;
 }
 
 export default function SignInScreen({ navigation }: SignInScreenProps) {
+  useWarmUpBrowser();
   const { signIn, setActive, isLoaded } = useSignIn();
+  const { startOAuthFlow } = useOAuth({ strategy: 'oauth_google' });
   const [emailAddress, setEmailAddress] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const onSignInPress = async () => {
     if (!isLoaded) return;
@@ -33,8 +60,6 @@ export default function SignInScreen({ navigation }: SignInScreenProps) {
       });
 
       await setActive({ session: completeSignIn.createdSessionId });
-      // Navigation will be handled automatically by the auth state change in AppNavigator
-      console.log('Sign in successful');
     } catch (err: any) {
       Alert.alert('Error', err.errors?.[0]?.message || 'Sign in failed');
     } finally {
@@ -42,211 +67,327 @@ export default function SignInScreen({ navigation }: SignInScreenProps) {
     }
   };
 
+  const onGoogleSignIn = async () => {
+    try {
+      const { createdSessionId, setActive: oauthSetActive } = await startOAuthFlow();
+      
+      if (createdSessionId && oauthSetActive) {
+        await oauthSetActive({ session: createdSessionId });
+        console.log('Google sign in successful');
+      }
+    } catch (err: any) {
+      console.error('Google sign in error:', err);
+      Alert.alert('Error', err.message || 'Google sign in failed');
+    }
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
+    <TexturedBackground variant="medium">
+      <KeyboardAvoidingView 
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
         >
-          <Ionicons name="arrow-back" size={24} color="#374151" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Welcome Back</Text>
-      </View>
-
-      <View style={styles.content}>
-        <View style={styles.logoContainer}>
-          <View style={styles.logoPlaceholder}>
-            <Ionicons name="leaf" size={40} color="#10b981" />
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.logoContainer}>
+              <View style={styles.logoCircle}>
+                <Image 
+                  source={require('../assets/yoga.png')} 
+                  style={styles.logoImage}
+                  resizeMode="contain"
+                />
+              </View>
+              <Text style={styles.logoText}>Yoga Flow</Text>
+              <Text style={styles.tagline}>Rishikesh to the World</Text>
+            </View>
           </View>
-          <Text style={styles.appName}>Yoga Flow</Text>
-          <Text style={styles.subtitle}>Continue your yoga journey</Text>
-        </View>
 
-        <View style={styles.authContainer}>
-          <View style={styles.formCard}>
-            <Text style={styles.formTitle}>Sign In</Text>
-            <Text style={styles.formSubtitle}>Enter your credentials to continue</Text>
+          {/* Welcome Text */}
+          <View style={styles.welcomeContainer}>
+            <Text style={styles.welcomeTitle}>Welcome Back</Text>
+            <Text style={styles.welcomeSubtitle}>
+              Continue your yoga journey with us
+            </Text>
+          </View>
 
+          {/* Sign In Form */}
+          <GlassCard intensity="medium" style={styles.formContainer}>
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Email</Text>
-              <TextInput
-                style={styles.input}
-                value={emailAddress}
-                onChangeText={setEmailAddress}
-                placeholder="Enter your email"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-              />
+              <View style={styles.inputWrapper}>
+                <Ionicons name="mail-outline" size={20} color={colors.gray} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Email address"
+                  placeholderTextColor={colors.textLight}
+                  value={emailAddress}
+                  onChangeText={setEmailAddress}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                />
+              </View>
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Password</Text>
-              <TextInput
-                style={styles.input}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Enter your password"
-                secureTextEntry
-                autoComplete="password"
-              />
+              <View style={styles.inputWrapper}>
+                <Ionicons name="lock-closed-outline" size={20} color={colors.gray} style={styles.inputIcon} />
+                <TextInput
+                  style={[styles.input, styles.passwordInput]}
+                  placeholder="Password"
+                  placeholderTextColor={colors.textLight}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  autoComplete="password"
+                />
+                <TouchableOpacity
+                  style={styles.eyeIcon}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Ionicons 
+                    name={showPassword ? "eye-outline" : "eye-off-outline"} 
+                    size={20} 
+                    color={colors.gray} 
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
+
+            <TouchableOpacity style={styles.forgotPassword}>
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            </TouchableOpacity>
 
             <TouchableOpacity
               style={[styles.signInButton, loading && styles.disabledButton]}
               onPress={onSignInPress}
               disabled={loading || !emailAddress || !password}
             >
-              {loading ? (
-                <ActivityIndicator color="#ffffff" />
-              ) : (
-                <Text style={styles.signInButtonText}>Sign In</Text>
-              )}
+              <LinearGradient
+                colors={[colors.primary, colors.primaryLight]}
+                style={styles.buttonGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                {loading ? (
+                  <Text style={styles.buttonText}>Signing In...</Text>
+                ) : (
+                  <Text style={styles.buttonText}>Sign In</Text>
+                )}
+              </LinearGradient>
             </TouchableOpacity>
-          </View>
-        </View>
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-            <Text style={styles.footerLink}>Sign up here</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </SafeAreaView>
+            {/* Divider */}
+            <View style={styles.dividerContainer}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or continue with</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            {/* Social Sign In */}
+            <TouchableOpacity style={styles.socialButton} onPress={onGoogleSignIn}>
+              <Ionicons name="logo-google" size={20} color={colors.error} />
+              <Text style={styles.socialButtonText}>Continue with Google</Text>
+            </TouchableOpacity>
+
+            {/* Sign Up Link */}
+            <View style={styles.signUpContainer}>
+              <Text style={styles.signUpText}>Don't have an account? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+                <Text style={styles.signUpLink}>Sign Up</Text>
+              </TouchableOpacity>
+            </View>
+          </GlassCard>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </TexturedBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
   },
   header: {
-    flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  backButton: {
-    padding: 8,
-    marginRight: 15,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#374151',
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 30,
+    paddingTop: 60,
+    paddingBottom: 40,
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 40,
   },
-  logoPlaceholder: {
-    width: 80,
-    height: 80,
-    backgroundColor: '#ecfdf5',
-    borderRadius: 40,
+  logoCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 16,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 12,
   },
-  appName: {
+  logoImage: {
+    width: 80,
+    height: 80,
+  },
+  logoText: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: colors.secondary,
+    marginBottom: 4,
+  },
+  tagline: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    fontWeight: '500',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  welcomeContainer: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  welcomeTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#374151',
-    marginBottom: 5,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#6b7280',
-    textAlign: 'center',
-  },
-  authContainer: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  formCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 15,
-    padding: 25,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  formTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#374151',
-    textAlign: 'center',
+    color: colors.textPrimary,
     marginBottom: 8,
   },
-  formSubtitle: {
+  welcomeSubtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    color: colors.textSecondary,
     textAlign: 'center',
-    marginBottom: 30,
+    lineHeight: 24,
+  },
+  formContainer: {
+    marginHorizontal: 0,
+    marginBottom: 20,
   },
   inputContainer: {
     marginBottom: 20,
   },
-  inputLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 8,
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  inputIcon: {
+    marginRight: 12,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    paddingVertical: 12,
+    flex: 1,
     fontSize: 16,
-    backgroundColor: '#f9fafb',
+    color: colors.textPrimary,
+    paddingVertical: 16,
   },
-  signInButton: {
-    backgroundColor: '#10b981',
-    borderRadius: 10,
-    paddingVertical: 15,
-    alignItems: 'center',
-    marginTop: 10,
+  passwordInput: {
+    paddingRight: 40,
   },
-  disabledButton: {
-    backgroundColor: '#9ca3af',
+  eyeIcon: {
+    position: 'absolute',
+    right: 16,
+    padding: 4,
   },
-  signInButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
+  forgotPassword: {
+    alignSelf: 'flex-end',
+    marginBottom: 32,
+  },
+  forgotPasswordText: {
+    fontSize: 14,
+    color: colors.primary,
     fontWeight: '600',
   },
-  footer: {
+  signInButton: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 24,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  disabledButton: {
+    opacity: 0.7,
+  },
+  buttonGradient: {
+    paddingVertical: 18,
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.textWhite,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.lightGray,
+  },
+  dividerText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginHorizontal: 16,
+  },
+  socialButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    paddingVertical: 16,
+    marginBottom: 32,
+    borderWidth: 1,
+    borderColor: colors.lightGray,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  socialButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginLeft: 12,
+  },
+  signUpContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingBottom: 32,
   },
-  footerText: {
+  signUpText: {
     fontSize: 16,
-    color: '#6b7280',
-    marginRight: 5,
+    color: colors.textSecondary,
   },
-  footerLink: {
+  signUpLink: {
     fontSize: 16,
-    color: '#10b981',
-    fontWeight: '600',
+    fontWeight: 'bold',
+    color: colors.primary,
   },
 });

@@ -10,9 +10,11 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase, MessageType } from '../services/supabase';
 import { useAuth, useUser } from '@clerk/clerk-expo';
+import { colors } from '../utils/colors';
 
 // Extended message type with sender info
 type MessageWithSender = MessageType & {
@@ -175,8 +177,11 @@ export default function CommunityScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>Community</Text>
+      <LinearGradient
+        colors={[colors.primary, colors.primaryLight]}
+        style={styles.header}
+      >
+        <Text style={styles.title}>Chats</Text>
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false}
@@ -194,7 +199,7 @@ export default function CommunityScreen() {
               <Ionicons 
                 name={room.icon as any} 
                 size={16} 
-                color={currentRoom === room.id ? 'white' : '#10b981'} 
+                color={currentRoom === room.id ? colors.textWhite : colors.secondary} 
               />
               <Text style={[
                 styles.roomButtonText,
@@ -205,7 +210,7 @@ export default function CommunityScreen() {
             </TouchableOpacity>
           ))}
         </ScrollView>
-      </View>
+      </LinearGradient>
 
       <ScrollView
         ref={scrollViewRef}
@@ -214,7 +219,7 @@ export default function CommunityScreen() {
       >
         {messages.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="chatbubble-outline" size={64} color="#d1d5db" />
+            <Ionicons name="chatbubble-outline" size={64} color={colors.lightGray} />
             <Text style={styles.emptyTitle}>No messages yet</Text>
             <Text style={styles.emptyText}>
               Be the first to start the conversation!
@@ -270,30 +275,28 @@ export default function CommunityScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.background,
+    paddingBottom: 110,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.background,
   },
   loadingText: {
     fontSize: 16,
-    color: '#6b7280',
+    color: colors.textSecondary,
   },
   header: {
-    backgroundColor: 'white',
     paddingTop: 60,
     paddingBottom: 15,
     paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#065f46',
+    color: colors.textWhite,
     marginBottom: 15,
   },
   roomSelector: {
@@ -306,15 +309,15 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#10b981',
+    borderColor: colors.secondary,
     marginRight: 10,
   },
   activeRoomButton: {
-    backgroundColor: '#10b981',
+    backgroundColor: colors.secondary,
   },
   roomButtonText: {
     fontSize: 14,
-    color: '#10b981',
+    color: colors.secondary,
     marginLeft: 5,
     fontWeight: '600',
   },
@@ -334,21 +337,21 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#374151',
+    color: colors.textPrimary,
     marginTop: 16,
     marginBottom: 8,
   },
   emptyText: {
     fontSize: 16,
-    color: '#6b7280',
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   messageItem: {
-    backgroundColor: 'white',
+    backgroundColor: colors.cardBackground,
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
@@ -363,38 +366,39 @@ const styles = StyleSheet.create({
   senderName: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#10b981',
+    color: colors.primary,
   },
   messageTime: {
     fontSize: 12,
-    color: '#6b7280',
+    color: colors.textSecondary,
   },
   messageContent: {
     fontSize: 16,
-    color: '#374151',
+    color: colors.textPrimary,
     lineHeight: 22,
   },
   inputContainer: {
     flexDirection: 'row',
     padding: 15,
-    backgroundColor: 'white',
+    backgroundColor: colors.cardBackground,
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
+    borderTopColor: colors.lightGray,
     alignItems: 'flex-end',
   },
   messageInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: colors.lightGray,
     borderRadius: 20,
     paddingHorizontal: 15,
     paddingVertical: 10,
     marginRight: 10,
     maxHeight: 100,
     fontSize: 16,
+    color: colors.textPrimary,
   },
   sendButton: {
-    backgroundColor: '#10b981',
+    backgroundColor: colors.primary,
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -402,17 +406,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   disabledSendButton: {
-    backgroundColor: '#d1d5db',
+    backgroundColor: colors.lightGray,
   },
   signInPrompt: {
     padding: 20,
-    backgroundColor: 'white',
+    backgroundColor: colors.cardBackground,
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
+    borderTopColor: colors.lightGray,
     alignItems: 'center',
   },
   signInText: {
     fontSize: 16,
-    color: '#6b7280',
+    color: colors.textSecondary,
   },
 });
