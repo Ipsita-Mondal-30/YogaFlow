@@ -1,0 +1,199 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  clerkId   String   @unique @map("clerk_id")
+  name      String
+  email     String
+  avatarUrl String?  @map("avatar_url")
+  role      UserRole @default(STUDENT)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Teacher-specific fields
+  bio            String?   @map("bio")
+  specialization String?   @map("specialization")
+  certifications String[]  @default([]) @map("certifications")
+  experience     Int?      @map("experience_years")
+  hourlyRate     Decimal?  @map("hourly_rate") @db.Decimal(10, 2)
+
+  // Student-specific fields
+  subscriptionPlan String?   @default("free") @map("subscription_plan")
+  subscriptionEnd  DateTime? @map("subscription_end") @db.Timestamptz
+  totalClassesJoined Int     @default(0) @map("total_classes_joined")
+
+  // Relations
+  classes        Class[]        @relation("TeacherClasses")
+  videos         Video[]        @relation("UserVideos")
+  blogPosts      BlogPost[]     @relation("AuthorPosts")
+  messages       Message[]      @relation("UserMessages")
+  enrollments    Enrollment[]   @relation("StudentEnrollments")
+
+  @@map("users")
+}
+
+model Class {
+  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  title           String
+  description     String?
+  teacherId       String    @map("teacher_id") @db.Uuid
+  type            ClassType
+  startAt         DateTime? @map("start_at") @db.Timestamptz
+  durationMinutes Int       @default(60) @map("duration_minutes")
+  videoId         String?   @map("video_id") @db.Uuid
+  meetingLink     String?   @map("meeting_link")
+  maxStudents     Int?      @map("max_students")
+  price           Decimal?  @map("price") @db.Decimal(10, 2)
+  level           ClassLevel @default(BEGINNER)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  teacher     User         @relation("TeacherClasses", fields: [teacherId], references: [id], onDelete: Cascade)
+  video       Video?       @relation("ClassVideo", fields: [videoId], references: [id])
+  enrollments Enrollment[] @relation("ClassEnrollments")
+
+  @@map("classes")
+}
+
+model Video {
+  id          String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  storagePath String          @map("storage_path")
+  title       String
+  description String?
+  uploadedBy  String          @map("uploaded_by") @db.Uuid
+  visibility  VideoVisibility @default(PRIVATE)
+  createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  uploader User    @relation("UserVideos", fields: [uploadedBy], references: [id], onDelete: Cascade)
+  classes  Class[] @relation("ClassVideo")
+
+  @@map("videos")
+}
+
+model Asana {
+  id           String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name         String
+  sanskritName String          @map("sanskrit_name")
+  difficulty   AsanaDifficulty
+  steps        String
+  benefits     String
+  precautions  String
+  imageUrl     String?         @map("image_url")
+  createdAt    DateTime        @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("asanas")
+}
+
+model BlogPost {
+  id            String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  title         String
+  slug          String    @unique
+  content       String
+  authorId      String    @map("author_id") @db.Uuid
+  tags          String[]
+  publishedAt   DateTime? @map("published_at") @db.Timestamptz
+  featuredImage String?   @map("featured_image")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  author User @relation("AuthorPosts", fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("blog_posts")
+}
+
+model Message {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  room      String   @default("general")
+  senderId  String   @map("sender_id") @db.Uuid
+  content   String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  sender User @relation("UserMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model ContactMessage {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("contact_messages")
+}
+
+model Enrollment {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  studentId String   @map("student_id") @db.Uuid
+  classId   String   @map("class_id") @db.Uuid
+  status    EnrollmentStatus @default(ENROLLED)
+  enrolledAt DateTime @default(now()) @map("enrolled_at") @db.Timestamptz
+  completedAt DateTime? @map("completed_at") @db.Timestamptz
+
+  // Relations
+  student User  @relation("StudentEnrollments", fields: [studentId], references: [id], onDelete: Cascade)
+  class   Class @relation("ClassEnrollments", fields: [classId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, classId])
+  @@map("enrollments")
+}
+
+// Enums
+enum UserRole {
+  STUDENT @map("student")
+  TEACHER @map("teacher")
+  ADMIN   @map("admin")
+
+  @@map("user_role")
+}
+
+enum ClassType {
+  LIVE     @map("live")
+  RECORDED @map("recorded")
+
+  @@map("class_type")
+}
+
+enum VideoVisibility {
+  PUBLIC  @map("public")
+  PRIVATE @map("private")
+
+  @@map("video_visibility")
+}
+
+enum AsanaDifficulty {
+  BEGINNER     @map("beginner")
+  INTERMEDIATE @map("intermediate")
+  ADVANCED     @map("advanced")
+
+  @@map("asana_difficulty")
+}
+
+enum ClassLevel {
+  BEGINNER     @map("beginner")
+  INTERMEDIATE @map("intermediate")
+  ADVANCED     @map("advanced")
+
+  @@map("class_level")
+}
+
+enum EnrollmentStatus {
+  ENROLLED  @map("enrolled")
+  COMPLETED @map("completed")
+  CANCELLED @map("cancelled")
+
+  @@map("enrollment_status")
+}
