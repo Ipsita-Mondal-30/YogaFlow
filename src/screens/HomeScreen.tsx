@@ -13,10 +13,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../utils/colors';
 import TexturedBackground from '../components/TexturedBackground';
 import GlassCard from '../components/GlassCard';
+import { useUserRole } from '../hooks/useUserRole';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen({ navigation }: any) {
+  const { isAdmin, isStudent } = useUserRole();
+
   return (
     <TexturedBackground variant="subtle">
       <ScrollView style={styles.container}>
@@ -113,7 +116,7 @@ export default function HomeScreen({ navigation }: any) {
             </GlassCard>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation.navigate('Chats')}>
+          <TouchableOpacity onPress={() => navigation.navigate('Community')}>
             <GlassCard intensity="medium" style={styles.featureCard}>
               <View style={styles.featureIconContainer}>
                 <Ionicons name="people" size={40} color={colors.teal} />
@@ -133,15 +136,27 @@ export default function HomeScreen({ navigation }: any) {
             </GlassCard>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation.navigate('Blog')}>
-            <GlassCard intensity="medium" style={styles.featureCard}>
-              <View style={styles.featureIconContainer}>
-                <Ionicons name="library" size={40} color={colors.indigo} />
-              </View>
-              <Text style={styles.featureTitle}>Yoga Wisdom</Text>
-              <Text style={styles.featureText}>Read insights and research</Text>
-            </GlassCard>
-          </TouchableOpacity>
+          {isAdmin ? (
+            <TouchableOpacity onPress={() => navigation.navigate('AdminVideoUpload')}>
+              <GlassCard intensity="medium" style={styles.featureCard}>
+                <View style={styles.featureIconContainer}>
+                  <Ionicons name="cloud-upload" size={40} color={colors.primary} />
+                </View>
+                <Text style={styles.featureTitle}>Upload Video</Text>
+                <Text style={styles.featureText}>Add new content for students</Text>
+              </GlassCard>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity onPress={() => navigation.navigate('Blog')}>
+              <GlassCard intensity="medium" style={styles.featureCard}>
+                <View style={styles.featureIconContainer}>
+                  <Ionicons name="library" size={40} color={colors.indigo} />
+                </View>
+                <Text style={styles.featureTitle}>Yoga Wisdom</Text>
+                <Text style={styles.featureText}>Read insights and research</Text>
+              </GlassCard>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 

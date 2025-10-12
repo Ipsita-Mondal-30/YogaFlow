@@ -77,7 +77,7 @@ export default function SignInScreen({ navigation }: SignInScreenProps) {
       }
     } catch (err: any) {
       console.error('Google sign in error:', err);
-      Alert.alert('Error', err.message || 'Google sign in failed');
+      Alert.alert('Error', 'Google sign in failed');
     }
   };
 
@@ -224,13 +224,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logoCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.2,

@@ -17,7 +17,12 @@ import { useAuth, useUser } from '@clerk/clerk-expo';
 import { colors } from '../utils/colors';
 
 // Extended message type with sender info
-type MessageWithSender = MessageType & {
+type MessageWithSender = {
+  id: string;
+  room: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
   sender?: {
     name: string;
     email: string;
@@ -35,10 +40,12 @@ export default function CommunityScreen() {
 
   useEffect(() => {
     fetchMessages();
-    subscribeToMessages();
+    const unsubscribe = subscribeToMessages();
+    return unsubscribe;
   }, [currentRoom]);
 
   const fetchMessages = async () => {
+    console.log('Fetching messages for room:', currentRoom);
     try {
       const { data, error } = await supabase
         .from('messages')
@@ -50,10 +57,16 @@ export default function CommunityScreen() {
         .order('created_at', { ascending: true })
         .limit(50);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching messages:', error);
+        throw error;
+      }
+
+      console.log('Fetched messages:', data?.length || 0);
       setMessages(data || []);
     } catch (error) {
       console.error('Error fetching messages:', error);
+      Alert.alert('Error', 'Failed to load messages. Please check your connection.');
     } finally {
       setLoading(false);
     }
@@ -100,18 +113,32 @@ export default function CommunityScreen() {
       return;
     }
 
+    console.log('Attempting to send message:', {
+      message: newMessage.trim(),
+      room: currentRoom,
+      userId: user.id
+    });
+
     try {
       // First, ensure user exists in our database
-      const { data: existingUser } = await supabase
+      const { data: existingUser, error: userFetchError } = await supabase
         .from('users')
         .select('id')
         .eq('clerk_id', user.id)
         .single();
 
+      if (userFetchError && userFetchError.code !== 'PGRST116') {
+        console.error('Error fetching user:', userFetchError);
+        Alert.alert('Error', 'Failed to verify user. Please try again.');
+        return;
+      }
+
       let userId = existingUser?.id;
 
       if (!existingUser) {
-        // Create user if doesn't exist
+        console.log('User not found, creating new user...');
+        // Create user if doesn't exist - this should happen during role selection
+        // but we'll handle it here as a fallback
         const { data: newUser, error: userError } = await supabase
           .from('users')
           .insert({
@@ -123,10 +150,16 @@ export default function CommunityScreen() {
           .select('id')
           .single();
 
-        if (userError) throw userError;
+        if (userError) {
+          console.error('Error creating user:', userError);
+          Alert.alert('Error', 'Failed to create user profile. Please try signing out and back in.');
+          return;
+        }
         userId = newUser.id;
+        console.log('Created new user with ID:', userId);
       }
 
+      console.log('Sending message with userId:', userId);
       const { error } = await supabase
         .from('messages')
         .insert({
@@ -135,11 +168,17 @@ export default function CommunityScreen() {
           content: newMessage.trim(),
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error sending message:', error);
+        Alert.alert('Error', `Failed to send message: ${error.message}`);
+        return;
+      }
+
+      console.log('Message sent successfully');
       setNewMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
-      Alert.alert('Error', 'Failed to send message');
+      Alert.alert('Error', 'Failed to send message. Please check your connection and try again.');
     }
   };
 
@@ -173,17 +212,18 @@ export default function CommunityScreen() {
   }
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
       <LinearGradient
         colors={[colors.primary, colors.primaryLight]}
         style={styles.header}
       >
-        <Text style={styles.title}>Chats</Text>
-        <ScrollView 
-          horizontal 
+        <Text style={styles.title}>Community</Text>
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.roomSelector}
         >
@@ -196,10 +236,10 @@ export default function CommunityScreen() {
               ]}
               onPress={() => setCurrentRoom(room.id)}
             >
-              <Ionicons 
-                name={room.icon as any} 
-                size={16} 
-                color={currentRoom === room.id ? colors.textWhite : colors.secondary} 
+              <Ionicons
+                name={room.icon as any}
+                size={16}
+                color={currentRoom === room.id ? colors.textWhite : colors.secondary}
               />
               <Text style={[
                 styles.roomButtonText,
@@ -233,7 +273,7 @@ export default function CommunityScreen() {
                   {message.sender?.name || 'Anonymous'}
                 </Text>
                 <Text style={styles.messageTime}>
-                  {formatTime(message.createdAt.toString())}
+                  {formatTime(message.created_at || new Date().toISOString())}
                 </Text>
               </View>
               <Text style={styles.messageContent}>{message.content}</Text>
@@ -249,15 +289,25 @@ export default function CommunityScreen() {
             value={newMessage}
             onChangeText={setNewMessage}
             placeholder="Type your message..."
-            multiline
+            placeholderTextColor={colors.textSecondary}
+            multiline={true}
             maxLength={500}
+            returnKeyType="send"
+            onSubmitEditing={() => {
+              if (newMessage.trim()) {
+                sendMessage();
+              }
+            }}
           />
           <TouchableOpacity
             style={[
               styles.sendButton,
               !newMessage.trim() && styles.disabledSendButton
             ]}
-            onPress={sendMessage}
+            onPress={() => {
+              console.log('Send button pressed, message:', newMessage);
+              sendMessage();
+            }}
             disabled={!newMessage.trim()}
           >
             <Ionicons name="send" size={20} color="white" />
@@ -276,7 +326,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    paddingBottom: 110,
+    paddingBottom: 110, // Add padding to prevent overlap with tab navigation
   },
   centerContainer: {
     flex: 1,
@@ -327,6 +377,7 @@ const styles = StyleSheet.create({
   messagesContainer: {
     flex: 1,
     padding: 15,
+    paddingBottom: 180, // Space for both input container and tab navigation
   },
   emptyContainer: {
     flex: 1,
@@ -380,10 +431,17 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     padding: 15,
+    paddingBottom: 20,
     backgroundColor: colors.cardBackground,
     borderTopWidth: 1,
     borderTopColor: colors.lightGray,
-    alignItems: 'flex-end',
+    alignItems: 'center',
+    minHeight: 70,
+    position: 'absolute',
+    bottom: 110, // Position well above the tab navigation (25 + 65 + 20 margin)
+    left: 0,
+    right: 0,
+    zIndex: 500, // Below tab bar but above content
   },
   messageInput: {
     flex: 1,
@@ -391,11 +449,14 @@ const styles = StyleSheet.create({
     borderColor: colors.lightGray,
     borderRadius: 20,
     paddingHorizontal: 15,
-    paddingVertical: 10,
+    paddingVertical: 12,
     marginRight: 10,
+    minHeight: 40,
     maxHeight: 100,
     fontSize: 16,
     color: colors.textPrimary,
+    backgroundColor: colors.white,
+    textAlignVertical: 'center',
   },
   sendButton: {
     backgroundColor: colors.primary,
@@ -414,6 +475,11 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.lightGray,
     alignItems: 'center',
+    position: 'absolute',
+    bottom: 110, // Position well above the tab navigation
+    left: 0,
+    right: 0,
+    zIndex: 500,
   },
   signInText: {
     fontSize: 16,

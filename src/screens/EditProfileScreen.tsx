@@ -70,8 +70,6 @@ export default function EditProfileScreen({ navigation }: any) {
       if (selectedImageBase64) {
         // Convert base64 to the format Clerk expects with correct MIME type
         const base64Data = `data:image/${selectedImageType};base64,${selectedImageBase64}`;
-        console.log('Uploading image with type:', selectedImageType);
-        console.log('Base64 data length:', selectedImageBase64.length);
         await user.setProfileImage({ file: base64Data });
       }
 

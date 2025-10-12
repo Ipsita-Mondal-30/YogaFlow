@@ -11,9 +11,25 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { supabase, Class } from '../services/supabase';
 import { useAuth } from '@clerk/clerk-expo';
 import { colors } from '../utils/colors';
+import { useUserRole } from '../hooks/useUserRole';
+import { supabase } from '../services/supabase';
+
+interface Class {
+  id: string;
+  title: string;
+  description?: string;
+  start_at: string;
+  is_live: boolean;
+  video_url?: string;
+  duration_minutes?: number;
+  type: 'live' | 'recorded';
+  teacher?: {
+    name: string;
+    email: string;
+  };
+}
 
 export default function ClassesScreen() {
   const navigation = useNavigation();
@@ -21,6 +37,7 @@ export default function ClassesScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { isSignedIn } = useAuth();
+  const { isAdmin, isStudent } = useUserRole();
 
   useEffect(() => {
     fetchClasses();
@@ -116,12 +133,13 @@ export default function ClassesScreen() {
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
+    <View style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
       <LinearGradient
         colors={[colors.primary, colors.primaryLight]}
         style={styles.header}
@@ -210,7 +228,23 @@ export default function ClassesScreen() {
           ))}
         </View>
       )}
-    </ScrollView>
+      </ScrollView>
+      
+      {/* Admin Floating Action Button */}
+      {isAdmin && (
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => (navigation as any).navigate('AdminVideoUpload')}
+        >
+          <LinearGradient
+            colors={[colors.primary, colors.primaryLight]}
+            style={styles.fabGradient}
+          >
+            <Ionicons name="add" size={24} color={colors.textWhite} />
+          </LinearGradient>
+        </TouchableOpacity>
+      )}
+    </View>
   );
 }
 
@@ -218,6 +252,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  scrollView: {
+    flex: 1,
     paddingBottom: 110,
   },
   centerContainer: {
@@ -359,5 +396,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 8,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 30,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    elevation: 8,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  fabGradient: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

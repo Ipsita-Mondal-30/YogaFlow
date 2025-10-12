@@ -42,8 +42,13 @@ export const colors = {
   
   // Background colors (clean and soothing)
   background: '#FFFEF7',     // Pure cream background
+  backgroundPrimary: '#FFFEF7', // Primary background (same as background)
+  backgroundSecondary: '#FAFAFA', // Secondary background for inputs/cards
   cardBackground: '#FFFFFF', // Pure white cards
   inputBackground: '#FAFAFA', // Very light input background
+  
+  // Border colors
+  borderPrimary: '#E0E0E0',  // Light border color
   
   // Gradient colors
   gradientStart: '#E67E22',  // Orange
