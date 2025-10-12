@@ -16,7 +16,7 @@ import { useUser } from '@clerk/clerk-expo';
 import { colors } from '../utils/colors';
 import TexturedBackground from '../components/TexturedBackground';
 import GlassCard from '../components/GlassCard';
-import { getVideos, deleteVideo, SavedVideo, clearAllVideos } from '../services/videoStorage';
+import { getVideos, deleteVideo, SavedVideo } from '../services/videoStorage';
 
 // SavedVideo interface is now imported from videoStorage service
 
@@ -161,25 +161,6 @@ export default function AdminVideosScreen() {
                   <Ionicons name="add" size={20} color={colors.textWhite} />
                   <Text style={styles.uploadButtonText}>Upload Video</Text>
                 </LinearGradient>
-              </TouchableOpacity>
-
-              {/* Debug button - remove in production */}
-              <TouchableOpacity
-                style={[styles.uploadButton, { marginTop: 10 }]}
-                onPress={async () => {
-                  try {
-                    const allVideos = await getVideos();
-                    Alert.alert('Debug', `Found ${allVideos.length} videos in storage`);
-                    console.log('All videos in storage:', allVideos);
-                  } catch (error) {
-                    Alert.alert('Debug Error', error instanceof Error ? error.message : 'An unknown error occurred');
-                  }
-                }}
-              >
-                <View style={[styles.uploadGradient, { backgroundColor: colors.teal }]}>
-                  <Ionicons name="bug" size={20} color={colors.textWhite} />
-                  <Text style={styles.uploadButtonText}>Debug: Check Storage</Text>
-                </View>
               </TouchableOpacity>
             </View>
           ) : (
