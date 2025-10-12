@@ -302,10 +302,10 @@ const styles = StyleSheet.create({
   },
   rolesContainer: {
     flex: 1,
-    justifyContent: 'flex-start',
-    gap: 20,
-    paddingVertical: 10,
-    maxHeight: '60%',
+    justifyContent: 'center',
+    gap: 24,
+    paddingVertical: 20,
+    maxHeight: '65%',
   },
   roleCard: {
     marginBottom: 0,
@@ -326,8 +326,8 @@ const styles = StyleSheet.create({
   roleCardContent: {
     padding: 0,
     borderRadius: 18,
-    minHeight: 160,
-    maxHeight: 180,
+    minHeight: 180,
+    maxHeight: 200,
   },
   roleHeader: {
     flexDirection: 'row',
@@ -375,18 +375,18 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   featuresContainer: {
-    paddingHorizontal: 24,
-    paddingBottom: 24,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    marginHorizontal: 12,
-    marginBottom: 12,
-    borderRadius: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderRadius: 14,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
-    paddingVertical: 4,
+    marginBottom: 10,
+    paddingVertical: 2,
   },
   checkmarkContainer: {
     width: 20,

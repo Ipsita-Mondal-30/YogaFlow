@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    paddingBottom: 110, // Add padding to prevent overlap with tab navigation
+    paddingBottom: 100, // Add padding to prevent overlap with tab navigation
   },
   centerContainer: {
     flex: 1,
