@@ -2,7 +2,6 @@ import { useUser } from '@clerk/clerk-expo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DatabaseService } from './database';
 import { supabase } from './supabase';
-
 // Type for Clerk user data
 type ClerkUser = NonNullable<ReturnType<typeof useUser>['user']>;
 
@@ -34,8 +33,8 @@ export async function syncUserWithPrisma(clerkUser: ClerkUser): Promise<void> {
     
     // All users are now treated as regular users (no role distinction)
     const userRole: 'STUDENT' | 'TEACHER' | 'ADMIN' = 'STUDENT';
-
-    const userData: UserSyncData = {
+    
+    const userData = {
       clerkId: clerkUser.id,
       email: clerkUser.emailAddresses[0]?.emailAddress || '',
       name: fullName,
@@ -59,10 +58,9 @@ export async function syncUserWithPrisma(clerkUser: ClerkUser): Promise<void> {
     }
   } catch (error) {
     console.error('Error syncing user with Prisma:', error);
-    throw new Error('Failed to sync user with database');
+    throw new Error('Failed to sync user with Prisma');
   }
 }
-
 /**
  * Sync user data with Supabase
  * Upserts user metadata for Supabase Storage access and other features
@@ -116,6 +114,46 @@ export async function syncUserData(clerkUser: ClerkUser): Promise<void> {
     console.log('User data fully synchronized:', clerkUser.id);
   } catch (error) {
     console.error('Error in complete user sync:', error);
+    throw error;
+  }
+}
+
+/**
+ * Sync user data with a specific role
+ * This function is called after role selection
+ */
+export async function syncUserWithRole(clerkUser: ClerkUser, role: 'STUDENT' | 'ADMIN'): Promise<void> {
+  try {
+    const fullName = `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || 'User';
+    
+    // Update Supabase with selected role
+    const userData = {
+      clerk_id: clerkUser.id,
+      email: clerkUser.emailAddresses[0]?.emailAddress || '',
+      name: clerkUser.fullName || fullName,
+      avatar_url: clerkUser.imageUrl || null,
+      role: role.toLowerCase(),
+      updated_at: new Date().toISOString(),
+    };
+
+    const { error } = await supabase
+      .from('users')
+      .upsert(userData, {
+        onConflict: 'clerk_id',
+        ignoreDuplicates: false,
+      });
+
+    if (error) {
+      console.error('Supabase role sync error:', error);
+      throw error;
+    }
+
+    // Store role in AsyncStorage for quick access
+    await AsyncStorage.setItem('userRole', role);
+    
+    console.log('User role synchronized:', clerkUser.id, role);
+  } catch (error) {
+    console.error('Error syncing user role:', error);
     throw error;
   }
 }

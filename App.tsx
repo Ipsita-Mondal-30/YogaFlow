@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ClerkProvider, tokenCache } from './src/services/clerk';
 import AppNavigator from './src/navigation/AppNavigator';
