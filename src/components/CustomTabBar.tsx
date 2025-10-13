@@ -21,11 +21,19 @@ export default function CustomTabBar({ state, descriptors, navigation }: CustomT
       >
         {state.routes.map((route: any, index: number) => {
           const { options } = descriptors[route.key];
+          const getLabel = (routeName: string) => {
+            if (routeName === 'Upload') return 'Upload';
+            if (routeName === 'Videos') return 'Videos';
+            if (routeName === 'Chats') return 'Chat';
+            if (routeName === 'Plans') return 'Plans';
+            return routeName;
+          };
+
           const label = options.tabBarLabel !== undefined 
             ? options.tabBarLabel 
             : options.title !== undefined 
             ? options.title 
-            : route.name;
+            : getLabel(route.name);
 
           const isFocused = state.index === index;
 
@@ -48,7 +56,13 @@ export default function CustomTabBar({ state, descriptors, navigation }: CustomT
               iconName = focused ? 'home' : 'home-outline';
             } else if (routeName === 'Classes') {
               iconName = focused ? 'play-circle' : 'play-circle-outline';
-            } else if (routeName === 'Chats') {
+            } else if (routeName === 'Plans') {
+              iconName = focused ? 'diamond' : 'diamond-outline';
+            } else if (routeName === 'Upload') {
+              iconName = focused ? 'cloud-upload' : 'cloud-upload-outline';
+            } else if (routeName === 'Videos') {
+              iconName = focused ? 'videocam' : 'videocam-outline';
+            } else if (routeName === 'Chats' || routeName === 'Community') {
               iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
             } else if (routeName === 'Blog') {
               iconName = focused ? 'library' : 'library-outline';

@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/yoga.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/yoga.png",
       "resizeMode": "contain",
@@ -38,7 +38,7 @@
     "scheme": "yoga-flow",
     "extra": {
       "eas": {
-        "projectId": "your-project-id"
+        "projectId": "9c94518c-cf0b-494e-a89f-5e5919f03728"
       }
     }
   }

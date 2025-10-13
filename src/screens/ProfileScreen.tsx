@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,14 +13,29 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth, useUser } from '@clerk/clerk-expo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors } from '../utils/colors';
 
 export default function ProfileScreen({ navigation }: any) {
   const { signOut } = useAuth();
   const { user } = useUser();
   const [showAbout, setShowAbout] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
-  const handleSignOut = async () => {
+  useEffect(() => {
+    loadUserRole();
+  }, []);
+
+  const loadUserRole = async () => {
+    try {
+      const role = await AsyncStorage.getItem('userRole');
+      setUserRole(role);
+    } catch (error) {
+      console.error('Error loading user role:', error);
+    }
+  };
+
+  const handleSignOut = () => {
     Alert.alert(
       'Sign Out',
       'Are you sure you want to sign out?',
@@ -49,13 +64,18 @@ export default function ProfileScreen({ navigation }: any) {
       onPress: () => navigation.navigate('EditProfile'),
     },
     {
+      icon: 'school-outline',
+      title: 'Our Instructors',
+      subtitle: 'Meet our certified Rishikesh masters',
+      onPress: () => navigation.navigate('Instructors'),
+    },
+    {
       icon: 'information-circle-outline',
       title: 'About Yoga Flow',
-      subtitle: 'Learn more about Yoga Flow',
+      subtitle: 'Learn more about our mission',
       onPress: () => setShowAbout(true),
     },
   ];
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
@@ -83,28 +103,13 @@ export default function ProfileScreen({ navigation }: any) {
       </LinearGradient>
 
       <View style={styles.content}>
-        <View style={styles.statsContainer}>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>0</Text>
-            <Text style={styles.statLabel}>Classes</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>0</Text>
-            <Text style={styles.statLabel}>Hours</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>0</Text>
-            <Text style={styles.statLabel}>Streak</Text>
-          </View>
-        </View>
+
 
         <View style={styles.menuContainer}>
           {menuItems.map((item, index) => (
             <TouchableOpacity
               key={index}
-              style={styles.menuItem}
+              style={[styles.menuItem, index === menuItems.length - 1 && styles.lastMenuItem]}
               onPress={item.onPress}
             >
               <View style={styles.menuIconContainer}>
@@ -170,13 +175,13 @@ export default function ProfileScreen({ navigation }: any) {
                 It all began with a vision:
               </Text>
               <Text style={styles.storyText}>
-                What if the peace and wisdom of Rishikesh could reach living rooms across the globe?
+                What if the peace and wisdom of traditional yoga could reach living rooms across the globe?
               </Text>
               <Text style={styles.storyText}>
                 After witnessing the global shift toward mental, physical, and emotional well-being — especially during the pandemic — we realized people needed more than just fitness videos. They needed real yoga, taught with heart.
               </Text>
               <Text style={styles.storyText}>
-                So we created Yoga Flow — a space where certified teachers from Rishikesh guide students through live online sessions, provide recorded classes, and offer a connected community via Telegram — all supported by a simple, peaceful, and intuitive platform.
+                So we created Yoga Flow — a space where certified teachers from Rishikesh guide students through live online sessions and offer a connected community via Telegram — all supported by a simple, peaceful, and intuitive platform.
               </Text>
             </View>
             
@@ -209,7 +214,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   profileSection: {
-    alignItems: 'center',
+    paddingBottom: 110,
   },
   avatarContainer: {
     marginBottom: 16,
@@ -247,43 +252,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20, // Add bottom padding to prevent content overlap
   },
-  statsContainer: {
-    flexDirection: 'row',
-    backgroundColor: colors.cardBackground,
-    borderRadius: 15,
-    padding: 20,
-    marginTop: -15,
-    marginBottom: 30,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.primary,
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    fontWeight: '600',
-  },
-  statDivider: {
-    width: 1,
-    backgroundColor: colors.lightGray,
-    marginHorizontal: 20,
-  },
   menuContainer: {
     backgroundColor: colors.cardBackground,
     borderRadius: 15,
     marginBottom: 30,
+    marginTop: 20,
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -297,6 +270,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: colors.lightGray,
+  },
+  lastMenuItem: {
+    borderBottomWidth: 0,
   },
   menuIconContainer: {
     width: 40,
@@ -350,7 +326,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   modalHeader: {
-    flexDirection: 'row',
+    height: 20,
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,

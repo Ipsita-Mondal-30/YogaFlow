@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ClerkProvider, tokenCache } from './src/services/clerk';
 import AppNavigator from './src/navigation/AppNavigator';
+import SplashVideo from './src/components/SplashVideo';
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
@@ -16,6 +17,7 @@ if (!publishableKey) {
 export default function App() {
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showSplashVideo, setShowSplashVideo] = useState(true);
 
   useEffect(() => {
     checkOnboardingStatus();
@@ -32,12 +34,20 @@ export default function App() {
     }
   };
 
+  const handleSplashFinish = () => {
+    setShowSplashVideo(false);
+  };
+
   const handleOnboardingComplete = () => {
     setHasSeenOnboarding(true);
   };
 
   if (isLoading) {
     return <View style={styles.container} />;
+  }
+
+  if (showSplashVideo) {
+    return <SplashVideo onFinish={handleSplashFinish} />;
   }
 
   return (

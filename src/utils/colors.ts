@@ -33,6 +33,7 @@ export const colors = {
   indigo: '#9FA8DA',         // Soft indigo for blogs
   pink: '#F8BBD9',           // Soft pink accent
   mint: '#A5D6A7',           // Soft mint green
+  orange: '#FFB74D',         // Soft orange
   
   // Text colors (soft and readable)
   textPrimary: '#424242',    // Soft dark gray for primary text
@@ -42,8 +43,13 @@ export const colors = {
   
   // Background colors (clean and soothing)
   background: '#FFFEF7',     // Pure cream background
+  backgroundPrimary: '#FFFEF7', // Primary background (same as background)
+  backgroundSecondary: '#FAFAFA', // Secondary background for inputs/cards
   cardBackground: '#FFFFFF', // Pure white cards
   inputBackground: '#FAFAFA', // Very light input background
+  
+  // Border colors
+  borderPrimary: '#E0E0E0',  // Light border color
   
   // Gradient colors
   gradientStart: '#E67E22',  // Orange

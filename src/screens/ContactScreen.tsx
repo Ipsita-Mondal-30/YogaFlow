@@ -118,6 +118,9 @@ export default function ContactScreen({ navigation }: any) {
                 Have questions about our classes, need guidance on your yoga journey,
                 or want to share feedback? We'd love to hear from you.
               </Text>
+              <Text style={styles.teamLocationText}>
+                Our team operates from Rishikesh, the yoga capital of the world.
+              </Text>
             </GlassCard>
 
             <GlassCard intensity="medium" style={styles.contactInfo}>
@@ -166,7 +169,7 @@ export default function ContactScreen({ navigation }: any) {
                   style={styles.input}
                   value={formData.email}
                   onChangeText={(value) => handleInputChange('email', value)}
-                  placeholder="your.email@example.com"
+                  placeholder="hello@yogaflow.com"
                   placeholderTextColor="#9ca3af"
                   keyboardType="email-address"
                   autoCapitalize="none"
@@ -278,6 +281,14 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     lineHeight: 24,
     textAlign: 'center',
+    marginBottom: 10,
+  },
+  teamLocationText: {
+    fontSize: 14,
+    color: colors.primary,
+    fontWeight: '600',
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
   contactInfo: {
     marginBottom: 20,
