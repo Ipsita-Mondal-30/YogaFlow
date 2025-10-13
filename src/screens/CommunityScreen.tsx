@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { supabase, MessageType } from '../services/supabase';
+import { supabase } from '../services/supabase';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { colors } from '../utils/colors';
 
@@ -215,13 +215,16 @@ export default function CommunityScreen() {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       <LinearGradient
         colors={[colors.primary, colors.primaryLight]}
         style={styles.header}
       >
         <Text style={styles.title}>Community</Text>
+        <Text style={styles.communitySubtitle}>
+          Connect with fellow teachers and fellow practitioners
+        </Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -326,7 +329,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    paddingBottom: 100, // Add padding to prevent overlap with tab navigation
   },
   centerContainer: {
     flex: 1,
@@ -347,6 +349,13 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold',
     color: colors.textWhite,
+    marginBottom: 8,
+  },
+  communitySubtitle: {
+    fontSize: 14,
+    color: colors.textWhite,
+    opacity: 0.9,
+    textAlign: 'center',
     marginBottom: 15,
   },
   roomSelector: {

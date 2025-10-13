@@ -234,7 +234,7 @@ export default function ClassesScreen() {
       {isAdmin && (
         <TouchableOpacity
           style={styles.fab}
-          onPress={() => (navigation as any).navigate('AdminVideoUpload')}
+          onPress={() => (navigation as any).navigate('Upload')}
         >
           <LinearGradient
             colors={[colors.primary, colors.primaryLight]}

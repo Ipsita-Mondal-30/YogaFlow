@@ -25,6 +25,7 @@ export default function CustomTabBar({ state, descriptors, navigation }: CustomT
             if (routeName === 'Upload') return 'Upload';
             if (routeName === 'Videos') return 'Videos';
             if (routeName === 'Chats') return 'Chat';
+            if (routeName === 'Plans') return 'Plans';
             return routeName;
           };
 
@@ -55,6 +56,8 @@ export default function CustomTabBar({ state, descriptors, navigation }: CustomT
               iconName = focused ? 'home' : 'home-outline';
             } else if (routeName === 'Classes') {
               iconName = focused ? 'play-circle' : 'play-circle-outline';
+            } else if (routeName === 'Plans') {
+              iconName = focused ? 'diamond' : 'diamond-outline';
             } else if (routeName === 'Upload') {
               iconName = focused ? 'cloud-upload' : 'cloud-upload-outline';
             } else if (routeName === 'Videos') {
