@@ -20,7 +20,7 @@ interface AnimatedSplashProps {
 
 export default function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
   const [currentScene, setCurrentScene] = useState(0);
-  
+
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
@@ -181,23 +181,23 @@ export default function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
     }
   };
 
-  const getSceneBackground = (): readonly [string, string, string] => {
+  const getSceneBackground = () => {
     switch (currentScene) {
       case 0:
       case 1:
-        return ['#87CEEB', '#4682B4', '#2F4F4F'] as const; // River/Bridge
+        return ['#87CEEB', '#4682B4', '#2F4F4F']; // River/Bridge
       case 2:
-        return ['#228B22', '#006400', '#2F4F2F'] as const; // Forest
+        return ['#228B22', '#006400', '#2F4F2F']; // Forest
       case 3:
-        return ['#DAA520', '#B8860B', '#8B7355'] as const; // Buddha/Temple
+        return ['#DAA520', '#B8860B', '#8B7355']; // Buddha/Temple
       case 4:
-        return ['#696969', '#2F2F2F', '#000000'] as const; // Cave entrance
+        return ['#696969', '#2F2F2F', '#000000']; // Cave entrance
       case 5:
-        return ['#4B0082', '#301934', '#1a0d1a'] as const; // Inside cave
+        return ['#4B0082', '#301934', '#1a0d1a']; // Inside cave
       case 6:
-        return ['#FFD700', '#FFA500', '#FF6347'] as const; // Transformation light
+        return ['#FFD700', '#FFA500', '#FF6347']; // Transformation light
       default:
-        return [colors.primary, colors.primaryLight, colors.secondary] as const;
+        return [colors.primary, colors.primaryLight, colors.secondary];
     }
   };
 
@@ -225,7 +225,7 @@ export default function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
   const renderCharacter = () => {
     const isTransformed = currentScene === 6;
     const isMeditating = currentScene === 5;
-    
+
     return (
       <Animated.View
         style={[
@@ -234,7 +234,7 @@ export default function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
             transform: [
               { translateX: translateXAnim },
               { scale: scaleAnim },
-              { 
+              {
                 rotate: rotateAnim.interpolate({
                   inputRange: [0, 1],
                   outputRange: ['0deg', '360deg'],
@@ -253,13 +253,13 @@ export default function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
           {isMeditating ? (
             <Text style={styles.meditatingEmoji}>🧘‍♂️</Text>
           ) : (
-            <Ionicons 
-              name={isTransformed ? "happy" : "person"} 
-              size={isTransformed ? 70 : 60} 
-              color={isTransformed ? "#FFD700" : colors.textWhite} 
+            <Ionicons
+              name={isTransformed ? "happy" : "person"}
+              size={isTransformed ? 70 : 60}
+              color={isTransformed ? "#FFD700" : colors.textWhite}
             />
           )}
-          
+
           {isTransformed && (
             <>
               <Animated.View
@@ -362,7 +362,7 @@ export default function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
             >
               <Ionicons name="sunny" size={120} color="#FFD700" />
             </Animated.View>
-            
+
             {/* Particle effects */}
             {[...Array(8)].map((_, i) => (
               <Animated.View
@@ -388,7 +388,7 @@ export default function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
                 <Ionicons name="sparkles" size={20} color="#FFD700" />
               </Animated.View>
             ))}
-            
+
             {/* Lotus petals */}
             {[...Array(6)].map((_, i) => (
               <Animated.View
@@ -417,17 +417,17 @@ export default function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
   return (
     <View style={styles.container}>
       <StatusBar hidden />
-      
+
       <LinearGradient
-        colors={getSceneBackground() as [string, string, string]}
+        colors={getSceneBackground()}
         style={styles.background}
       >
         {/* Scene Elements */}
         {renderSceneElements()}
-        
+
         {/* Character */}
         {renderCharacter()}
-        
+
         {/* Scene Info */}
         <Animated.View
           style={[

@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/yoga.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/yoga.png",
       "resizeMode": "contain",
