@@ -33,6 +33,7 @@ export const colors = {
   indigo: '#9FA8DA',         // Soft indigo for blogs
   pink: '#F8BBD9',           // Soft pink accent
   mint: '#A5D6A7',           // Soft mint green
+  orange: '#FFB74D',         // Soft orange
   
   // Text colors (soft and readable)
   textPrimary: '#424242',    // Soft dark gray for primary text

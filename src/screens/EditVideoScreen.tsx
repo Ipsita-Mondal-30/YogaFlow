@@ -96,7 +96,7 @@ export default function EditVideoScreen() {
         category: videoData.category.trim() || 'General',
         duration: videoData.duration.trim(),
         difficulty: videoData.difficulty as 'Beginner' | 'Intermediate' | 'Advanced',
-        tags: videoData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+        tags: videoData.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean),
       };
 
       await updateVideo(video.id, updates);
