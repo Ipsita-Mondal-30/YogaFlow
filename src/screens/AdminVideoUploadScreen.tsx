@@ -10,7 +10,7 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
-import { Video } from 'expo-av';
+import { Video, ResizeMode } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
@@ -281,7 +281,7 @@ const AdminVideoUploadScreen: React.FC = () => {
                 source={{ uri: selectedVideo.uri }}
                 style={styles.videoPreview}
                 useNativeControls
-                resizeMode="contain"
+                resizeMode={ResizeMode.CONTAIN}
                 shouldPlay={false}
               />
               <View style={styles.videoInfo}>
@@ -605,18 +605,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     resizeMode: 'cover',
   },
-  changeThumbnailButton: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-  },
-  changeThumbnailText: {
-    color: colors.textWhite,
-    fontSize: 14,
-    fontWeight: '500',
-    marginLeft: 4,
-  },
   // New styles for video preview and actions
   videoPreviewContainer: {
     backgroundColor: colors.cardBackground,
@@ -635,7 +623,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 15,
   },
-  fileName: {
+  fileNameText: {
     fontSize: 16,
     fontWeight: '600',
     color: colors.textPrimary,
@@ -695,6 +683,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
+  },
+  changeThumbnailText: {
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 4,
   },
   deleteThumbnailButton: {
     flexDirection: 'row',

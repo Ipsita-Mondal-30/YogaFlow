@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase, BlogPost } from '../services/supabase';
 import { colors } from '../utils/colors';
 
-export default function BlogScreen() {
+export default function BlogScreen({ navigation }: any) {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -145,6 +145,69 @@ export default function BlogScreen() {
           Insights, research, and ancient wisdom for modern practitioners
         </Text>
       </LinearGradient>
+
+      {/* Research Section */}
+      <View style={styles.researchSection}>
+        <Text style={styles.researchTitle}>🔬 Scientific Research</Text>
+        <Text style={styles.researchSubtitle}>
+          Evidence-based benefits of yoga practice
+        </Text>
+
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.researchScroll}>
+          <TouchableOpacity style={[styles.researchCard, { backgroundColor: '#fef3c7' }]}>
+            <View style={styles.researchIcon}>
+              <Ionicons name="heart" size={24} color="#f59e0b" />
+            </View>
+            <Text style={styles.researchMetric}>40%</Text>
+            <Text style={styles.researchLabel}>Anxiety Reduction</Text>
+            <Text style={styles.researchDetail}>Clinical populations</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.researchCard, { backgroundColor: '#fecaca' }]}>
+            <View style={styles.researchIcon}>
+              <Ionicons name="fitness" size={24} color="#ef4444" />
+            </View>
+            <Text style={styles.researchMetric}>4-8 mmHg</Text>
+            <Text style={styles.researchLabel}>BP Reduction</Text>
+            <Text style={styles.researchDetail}>Systolic pressure</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.researchCard, { backgroundColor: '#ddd6fe' }]}>
+            <View style={styles.researchIcon}>
+              <Ionicons name="body" size={24} color="#8b5cf6" />
+            </View>
+            <Text style={styles.researchMetric}>60%</Text>
+            <Text style={styles.researchLabel}>Back Pain Relief</Text>
+            <Text style={styles.researchDetail}>Within 3 weeks</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.researchCard, { backgroundColor: '#bbf7d0' }]}>
+            <View style={styles.researchIcon}>
+              <Ionicons name="moon" size={24} color="#10b981" />
+            </View>
+            <Text style={styles.researchMetric}>40%</Text>
+            <Text style={styles.researchLabel}>Sleep Quality</Text>
+            <Text style={styles.researchDetail}>Improvement in 4 weeks</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.researchCard, { backgroundColor: '#fed7d7' }]}>
+            <View style={styles.researchIcon}>
+              <Ionicons name="happy" size={24} color="#f56565" />
+            </View>
+            <Text style={styles.researchMetric}>45%</Text>
+            <Text style={styles.researchLabel}>Depression Relief</Text>
+            <Text style={styles.researchDetail}>HAM-D scale improvement</Text>
+          </TouchableOpacity>
+        </ScrollView>
+
+        <TouchableOpacity 
+          style={styles.viewAllResearch}
+          onPress={() => (navigation as any).navigate('Research')}
+        >
+          <Text style={styles.viewAllText}>View All Research Studies</Text>
+          <Ionicons name="arrow-forward" size={16} color={colors.primary} />
+        </TouchableOpacity>
+      </View>
 
       {posts.length === 0 ? (
         <View style={styles.emptyContainer}>
@@ -401,5 +464,79 @@ const styles = StyleSheet.create({
     color: '#374151',
     lineHeight: 26,
     marginBottom: 20,
+  },
+  researchSection: {
+    padding: 20,
+    backgroundColor: colors.white,
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 15,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  researchTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: colors.secondary,
+    marginBottom: 5,
+    textAlign: 'center',
+  },
+  researchSubtitle: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  researchScroll: {
+    marginBottom: 15,
+  },
+  researchCard: {
+    width: 140,
+    padding: 15,
+    borderRadius: 12,
+    marginRight: 15,
+    alignItems: 'center',
+  },
+  researchIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  researchMetric: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.secondary,
+    marginBottom: 5,
+  },
+  researchLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: 3,
+  },
+  researchDetail: {
+    fontSize: 10,
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
+  viewAllResearch: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+  },
+  viewAllText: {
+    fontSize: 14,
+    color: colors.primary,
+    fontWeight: '600',
+    marginRight: 5,
   },
 });

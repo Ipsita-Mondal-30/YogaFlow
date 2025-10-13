@@ -14,10 +14,11 @@ export type RootStackParamList = {
   Main: undefined;
   Contact: undefined;
   EditProfile: undefined;
-  AdminVideoUpload: undefined;
   EditVideo: { video: any };
   Onboarding: undefined;
   RoleSelection: undefined;
+  Research: undefined;
+  Instructors: undefined;
 };
 
 export type AuthStackParamList = {
@@ -28,6 +29,7 @@ export type AuthStackParamList = {
 export type StudentTabParamList = {
   Home: undefined;
   Classes: undefined;
+  Plans: undefined;
   Chats: undefined;
   Blog: undefined;
   Asanas: undefined;
@@ -61,6 +63,9 @@ import RoleSelectionScreen from '../screens/RoleSelectionScreen';
 import AdminVideoUploadScreen from '../screens/AdminVideoUploadScreen';
 import AdminVideosScreen from '../screens/AdminVideosScreen';
 import EditVideoScreen from '../screens/EditVideoScreen';
+import PlansScreen from '../screens/PlansScreen';
+import ResearchScreen from '../screens/ResearchScreen';
+import InstructorsScreen from '../screens/InstructorsScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const AuthStack = createStackNavigator<AuthStackParamList>();
@@ -77,6 +82,7 @@ const StudentTabNavigator = () => {
     >
       <StudentTab.Screen name="Home" component={HomeScreen} />
       <StudentTab.Screen name="Classes" component={ClassesScreen} />
+      <StudentTab.Screen name="Plans" component={PlansScreen} />
       <StudentTab.Screen name="Chats" component={CommunityScreen} />
       <StudentTab.Screen name="Blog" component={BlogScreen} />
       <StudentTab.Screen name="Asanas" component={AsanasScreen} />
@@ -227,6 +233,8 @@ const MainAppNavigator = ({
           <Stack.Screen name="Contact" component={ContactScreen} />
           <Stack.Screen name="EditProfile" component={EditProfileScreen} />
           <Stack.Screen name="EditVideo" component={EditVideoScreen} />
+          <Stack.Screen name="Research" component={ResearchScreen} />
+          <Stack.Screen name="Instructors" component={InstructorsScreen} />
         </>
       )}
     </Stack.Navigator>

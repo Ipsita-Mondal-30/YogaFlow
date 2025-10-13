@@ -13,6 +13,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../utils/colors';
 import TexturedBackground from '../components/TexturedBackground';
 import GlassCard from '../components/GlassCard';
+import WorldMap from '../components/WorldMap';
+import Testimonials from '../components/Testimonials';
+import InviteShare from '../components/InviteShare';
 import { useUserRole } from '../hooks/useUserRole';
 
 const { width } = Dimensions.get('window');
@@ -25,7 +28,7 @@ export default function HomeScreen({ navigation }: any) {
       <ScrollView style={styles.container}>
       {/* Hero Section */}
       <ImageBackground
-        source={{ uri: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80' }}
+        source={{ uri: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80' }}
         style={styles.hero}
       >
         <LinearGradient
@@ -84,8 +87,7 @@ export default function HomeScreen({ navigation }: any) {
           </View>
           <Text style={styles.cardTitle}>Our Vision</Text>
           <Text style={styles.cardText}>
-            Creating a global community where traditional yoga meets modern technology,
-            fostering inner peace, physical wellness, and spiritual growth.
+            To bring the wisdom of traditional yoga from Rishikesh to the world through modern, live experiences.
           </Text>
         </GlassCard>
 
@@ -95,8 +97,7 @@ export default function HomeScreen({ navigation }: any) {
           </View>
           <Text style={styles.cardTitle}>Our Values</Text>
           <Text style={styles.cardText}>
-            Authenticity, mindfulness, community, and the transformative power of
-            yoga as taught by masters in the birthplace of this ancient practice.
+            Rooted in lineage and elevated by modern tools, we value authenticity, mindful progress, inclusive community, and measurable transformation that honors both tradition and today.
           </Text>
         </GlassCard>
       </View>
@@ -122,7 +123,7 @@ export default function HomeScreen({ navigation }: any) {
                 <Ionicons name="people" size={40} color={colors.teal} />
               </View>
               <Text style={styles.featureTitle}>Community</Text>
-              <Text style={styles.featureText}>Connect with fellow practitioners</Text>
+              <Text style={styles.featureText}>Connect with fellow teachers and fellow practitioners</Text>
             </GlassCard>
           </TouchableOpacity>
 
@@ -137,7 +138,7 @@ export default function HomeScreen({ navigation }: any) {
           </TouchableOpacity>
 
           {isAdmin ? (
-            <TouchableOpacity onPress={() => navigation.navigate('AdminVideoUpload')}>
+            <TouchableOpacity onPress={() => navigation.navigate('Upload')}>
               <GlassCard intensity="medium" style={styles.featureCard}>
                 <View style={styles.featureIconContainer}>
                   <Ionicons name="cloud-upload" size={40} color={colors.primary} />
@@ -159,6 +160,15 @@ export default function HomeScreen({ navigation }: any) {
           )}
         </View>
       </View>
+
+      {/* World Map */}
+      <WorldMap />
+
+      {/* Testimonials */}
+      <Testimonials />
+
+      {/* Invite & Share */}
+      <InviteShare />
 
       {/* Contact CTA */}
       <View style={styles.section}>

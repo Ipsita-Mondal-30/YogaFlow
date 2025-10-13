@@ -165,10 +165,11 @@ export default function AsanasScreen() {
         </Text>
 
         <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="#6b7280" />
+          <Ionicons name="search" size={20} color={colors.primary} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search poses..."
+            placeholderTextColor={colors.textSecondary}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -295,17 +296,25 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f3f4f6',
-    borderRadius: 10,
+    backgroundColor: colors.white,
+    borderRadius: 12,
     paddingHorizontal: 15,
-    paddingVertical: 10,
+    paddingVertical: 12,
     marginBottom: 15,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   searchInput: {
     flex: 1,
     marginLeft: 10,
     fontSize: 16,
-    color: '#374151',
+    color: colors.textPrimary,
+    fontWeight: '500',
   },
   difficultySelector: {
     flexDirection: 'row',
@@ -358,16 +367,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   asanaCard: {
-    backgroundColor: 'white',
+    backgroundColor: colors.white,
     width: '48%',
     borderRadius: 15,
     marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 10,
     overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: colors.primary,
   },
   asanaCardImage: {
     width: '100%',
@@ -383,29 +394,36 @@ const styles = StyleSheet.create({
   },
   asanaCardContent: {
     padding: 15,
+    backgroundColor: colors.white,
   },
   asanaCardTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: 'bold',
-    color: '#065f46',
-    marginBottom: 5,
+    color: colors.secondary,
+    marginBottom: 6,
     lineHeight: 22,
   },
   asanaCardSanskrit: {
     fontSize: 14,
-    color: '#6b7280',
+    color: colors.textPrimary,
     fontStyle: 'italic',
     marginBottom: 10,
+    fontWeight: '600',
   },
   asanaCardDifficulty: {
     alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   asanaCardDifficultyText: {
     fontSize: 12,
-    color: 'white',
+    color: colors.textWhite,
     fontWeight: 'bold',
     textTransform: 'capitalize',
   },

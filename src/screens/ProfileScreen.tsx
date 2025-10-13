@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors } from '../utils/colors';
+
 export default function ProfileScreen({ navigation }: any) {
   const { signOut } = useAuth();
   const { user } = useUser();
@@ -61,6 +62,12 @@ export default function ProfileScreen({ navigation }: any) {
       title: 'Edit Profile',
       subtitle: 'Update your personal information',
       onPress: () => navigation.navigate('EditProfile'),
+    },
+    {
+      icon: 'school-outline',
+      title: 'Our Instructors',
+      subtitle: 'Meet our certified Rishikesh masters',
+      onPress: () => navigation.navigate('Instructors'),
     },
     {
       icon: 'information-circle-outline',
@@ -168,13 +175,13 @@ export default function ProfileScreen({ navigation }: any) {
                 It all began with a vision:
               </Text>
               <Text style={styles.storyText}>
-                What if the peace and wisdom of Rishikesh could reach living rooms across the globe?
+                What if the peace and wisdom of traditional yoga could reach living rooms across the globe?
               </Text>
               <Text style={styles.storyText}>
                 After witnessing the global shift toward mental, physical, and emotional well-being — especially during the pandemic — we realized people needed more than just fitness videos. They needed real yoga, taught with heart.
               </Text>
               <Text style={styles.storyText}>
-                So we created Yoga Flow — a space where certified teachers from Rishikesh guide students through live online sessions, provide recorded classes, and offer a connected community via Telegram — all supported by a simple, peaceful, and intuitive platform.
+                So we created Yoga Flow — a space where certified teachers from Rishikesh guide students through live online sessions and offer a connected community via Telegram — all supported by a simple, peaceful, and intuitive platform.
               </Text>
             </View>
             
