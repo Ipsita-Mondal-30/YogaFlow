@@ -2,7 +2,7 @@
   "expo": {
     "name": "Yoga Flow",
     "slug": "yoga-flow",
-    "owner": "avi_srivastava",
+    "owner": "ipsitaa_30",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/yoga.png",
@@ -39,7 +39,7 @@
     "scheme": "yoga-flow",
     "extra": {
       "eas": {
-        "projectId": "9d895cdd-3bf6-4e2c-8536-00dfa07531c3"
+        "projectId": "9c94518c-cf0b-494e-a89f-5e5919f03728"
       }
     }
   }
