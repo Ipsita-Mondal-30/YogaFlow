@@ -352,15 +352,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   roleTitle: {
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: 'bold',
     color: colors.secondary,
-    marginBottom: 4,
+    marginBottom: 3,
   },
   roleDescription: {
-    fontSize: 14,
+    fontSize: 13,
     color: colors.textSecondary,
-    lineHeight: 20,
+    lineHeight: 18,
+    flexShrink: 1,
   },
   selectedIndicator: {
     marginLeft: 12,
@@ -374,12 +375,12 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   featuresContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    marginHorizontal: 16,
-    marginBottom: 16,
-    borderRadius: 14,
+    marginHorizontal: 12,
+    marginBottom: 12,
+    borderRadius: 12,
   },
   featureItem: {
     flexDirection: 'row',
