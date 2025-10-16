@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Alert,
   Image,
+  ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -136,7 +137,7 @@ export default function RoleSelectionScreen({ onRoleSelected }: RoleSelectionScr
 
   return (
     <TexturedBackground variant="medium">
-      <View style={styles.container}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <View style={styles.logoContainer}>
             <View style={styles.logoCircle}>
@@ -172,7 +173,7 @@ export default function RoleSelectionScreen({ onRoleSelected }: RoleSelectionScr
               >
                 <View style={styles.roleHeader}>
                   <View style={[styles.roleIconContainer, { backgroundColor: role.color }]}>
-                    <Ionicons name={role.icon as any} size={32} color={colors.textWhite} />
+                    <Ionicons name={role.icon as any} size={24} color={colors.textWhite} />
                   </View>
                   <View style={styles.roleTitleContainer}>
                     <Text style={styles.roleTitle}>{role.title}</Text>
@@ -232,7 +233,7 @@ export default function RoleSelectionScreen({ onRoleSelected }: RoleSelectionScr
             You can change your role later in your profile settings
           </Text>
         </View>
-      </View>
+      </ScrollView>
 
       <CustomNotification
         visible={notification.visible}
@@ -248,38 +249,41 @@ export default function RoleSelectionScreen({ onRoleSelected }: RoleSelectionScr
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: 20,
-    paddingTop: 40,
-    paddingBottom: 30,
+    paddingTop: 50,
+    paddingBottom: 40,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 20,
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 20,
   },
   logoCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 15,
-    marginBottom: 20,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 10,
+    marginBottom: 12,
   },
   logoImage: {
-    width: 70,
-    height: 70,
+    width: 50,
+    height: 50,
   },
   logoText: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: 'bold',
     color: colors.secondary,
     textShadowColor: 'rgba(255, 255, 255, 0.5)',
@@ -287,25 +291,22 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   welcomeTitle: {
-    fontSize: 26,
+    fontSize: 22,
     fontWeight: 'bold',
     color: colors.textPrimary,
-    marginBottom: 10,
+    marginBottom: 8,
     textAlign: 'center',
   },
   welcomeSubtitle: {
-    fontSize: 17,
+    fontSize: 15,
     color: colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 26,
-    paddingHorizontal: 20,
+    lineHeight: 22,
+    paddingHorizontal: 15,
   },
   rolesContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    gap: 24,
-    paddingVertical: 20,
-    maxHeight: '65%',
+    gap: 16,
+    paddingVertical: 15,
   },
   roleCard: {
     marginBottom: 0,
@@ -326,28 +327,26 @@ const styles = StyleSheet.create({
   roleCardContent: {
     padding: 0,
     borderRadius: 18,
-    minHeight: 180,
-    maxHeight: 200,
   },
   roleHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
-    padding: 20,
+    marginBottom: 12,
+    padding: 16,
     paddingBottom: 0,
   },
   roleIconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 45,
+    height: 45,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 12,
     shadowColor: 'rgba(0, 0, 0, 0.2)',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 4,
   },
   roleTitleContainer: {
     flex: 1,
