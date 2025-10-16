@@ -18,7 +18,6 @@ export type RootStackParamList = {
   Onboarding: undefined;
   RoleSelection: undefined;
   Research: undefined;
-  Instructors: undefined;
 };
 
 export type AuthStackParamList = {
@@ -65,7 +64,6 @@ import AdminVideosScreen from '../screens/AdminVideosScreen';
 import EditVideoScreen from '../screens/EditVideoScreen';
 import PlansScreen from '../screens/PlansScreen';
 import ResearchScreen from '../screens/ResearchScreen';
-import InstructorsScreen from '../screens/InstructorsScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const AuthStack = createStackNavigator<AuthStackParamList>();
@@ -234,7 +232,6 @@ const MainAppNavigator = ({
           <Stack.Screen name="EditProfile" component={EditProfileScreen} />
           <Stack.Screen name="EditVideo" component={EditVideoScreen} />
           <Stack.Screen name="Research" component={ResearchScreen} />
-          <Stack.Screen name="Instructors" component={InstructorsScreen} />
         </>
       )}
     </Stack.Navigator>
