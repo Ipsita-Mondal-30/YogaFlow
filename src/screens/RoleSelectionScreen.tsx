@@ -190,7 +190,7 @@ export default function RoleSelectionScreen({ onRoleSelected }: RoleSelectionScr
                   {role.features.map((feature, index) => (
                     <View key={index} style={styles.featureItem}>
                       <View style={[styles.checkmarkContainer, { backgroundColor: role.color }]}>
-                        <Ionicons name="checkmark" size={14} color={colors.textWhite} />
+                        <Ionicons name="checkmark" size={10} color={colors.textWhite} />
                       </View>
                       <Text style={styles.featureText}>{feature}</Text>
                     </View>
@@ -384,39 +384,40 @@ const styles = StyleSheet.create({
   },
   featureItem: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-    paddingVertical: 2,
+    alignItems: 'flex-start',
+    marginBottom: 8,
+    paddingVertical: 1,
   },
   checkmarkContainer: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 10,
+    marginTop: 2,
   },
   featureText: {
-    fontSize: 15,
+    fontSize: 12,
     color: colors.textPrimary,
     flex: 1,
-    lineHeight: 22,
+    lineHeight: 16,
     fontWeight: '500',
   },
   actionContainer: {
     paddingVertical: 20,
     paddingHorizontal: 8,
-    marginTop: 'auto',
+    marginTop: 20,
   },
   continueButton: {
-    borderRadius: 16,
+    borderRadius: 14,
     overflow: 'hidden',
-    marginBottom: 20,
+    marginBottom: 15,
     shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   disabledButton: {
     opacity: 0.6,
