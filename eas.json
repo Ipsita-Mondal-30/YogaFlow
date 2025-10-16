@@ -6,21 +6,58 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://ztkantfywkokupkoligq.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp0a2FudGZ5d2tva3Vwa29saWdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1NTQ5NDcsImV4cCI6MjA3NTEzMDk0N30.1iZrv3B48FYDP4fK5qo8n2Jml01F0zJ4ofAv1A0fAcM",
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_c3VpdGVkLXRhcnBvbi0xMC5jbGVyay5hY2NvdW50cy5kZXYk",
+        "EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME": "do0kmajvs",
+        "EXPO_PUBLIC_CLOUDINARY_API_KEY": "964236748542784",
+        "EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET": "yoga_flow_uploads"
+      }
     },
     "preview": {
       "distribution": "internal",
-      "environment": "preview",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://ztkantfywkokupkoligq.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp0a2FudGZ5d2tva3Vwa29saWdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1NTQ5NDcsImV4cCI6MjA3NTEzMDk0N30.1iZrv3B48FYDP4fK5qo8n2Jml01F0zJ4ofAv1A0fAcM",
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_c3VpdGVkLXRhcnBvbi0xMC5jbGVyay5hY2NvdW50cy5kZXYk",
+        "EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME": "do0kmajvs",
+        "EXPO_PUBLIC_CLOUDINARY_API_KEY": "964236748542784",
+        "EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET": "yoga_flow_uploads"
       }
     },
     "production": {
       "autoIncrement": true,
-      "environment": "production",
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://ztkantfywkokupkoligq.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp0a2FudGZ5d2tva3Vwa29saWdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1NTQ5NDcsImV4cCI6MjA3NTEzMDk0N30.1iZrv3B48FYDP4fK5qo8n2Jml01F0zJ4ofAv1A0fAcM",
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_c3VpdGVkLXRhcnBvbi0xMC5jbGVyay5hY2NvdW50cy5kZXYk",
+        "EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME": "do0kmajvs",
+        "EXPO_PUBLIC_CLOUDINARY_API_KEY": "964236748542784",
+        "EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET": "yoga_flow_uploads"
+      }
+    },
+    "production-aab": {
+      "autoIncrement": true,
       "android": {
         "buildType": "app-bundle",
         "gradleCommand": ":app:bundleRelease"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://ztkantfywkokupkoligq.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp0a2FudGZ5d2tva3Vwa29saWdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1NTQ5NDcsImV4cCI6MjA3NTEzMDk0N30.1iZrv3B48FYDP4fK5qo8n2Jml01F0zJ4ofAv1A0fAcM",
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_c3VpdGVkLXRhcnBvbi0xMC5jbGVyay5hY2NvdW50cy5kZXYk",
+        "EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME": "do0kmajvs",
+        "EXPO_PUBLIC_CLOUDINARY_API_KEY": "964236748542784",
+        "EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET": "yoga_flow_uploads"
       }
     }
   },

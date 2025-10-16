@@ -20,18 +20,19 @@ interface SplashVideoProps {
 export default function SplashVideo({ onFinish }: SplashVideoProps) {
   const videoRef = useRef<Video>(null);
   const [showBlur, setShowBlur] = useState(false);
+  const [videoError, setVideoError] = useState(false);
   const blurOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Fallback timer - only if video doesn't finish naturally
     const fallbackTimer = setTimeout(() => {
-      if (!showBlur) {
+      if (!showBlur && !videoError) {
         handleVideoEnd();
       }
     }, 15000); // 15 second fallback
 
     return () => clearTimeout(fallbackTimer);
-  }, [onFinish, showBlur]);
+  }, [onFinish, showBlur, videoError]);
 
   const handleVideoEnd = () => {
     setShowBlur(true);
@@ -50,9 +51,28 @@ export default function SplashVideo({ onFinish }: SplashVideoProps) {
   };
 
   const handlePlaybackStatusUpdate = (status: any) => {
+    if (status.error) {
+      console.error('Video playback error:', status.error);
+      setVideoError(true);
+      // Skip video and go directly to app
+      setTimeout(() => {
+        onFinish();
+      }, 1000);
+      return;
+    }
+    
     if (status.didJustFinish && !showBlur) {
       handleVideoEnd();
     }
+  };
+
+  const handleVideoError = (error: any) => {
+    console.error('Video loading error:', error);
+    setVideoError(true);
+    // Skip video and go directly to app
+    setTimeout(() => {
+      onFinish();
+    }, 1000);
   };
 
   return (
@@ -60,16 +80,21 @@ export default function SplashVideo({ onFinish }: SplashVideoProps) {
       <StatusBar hidden />
       
       {/* Video Background */}
-      <Video
-        ref={videoRef}
-        style={styles.video}
-        source={require('../assets/yoga.mp4')}
-        useNativeControls={false}
-        resizeMode={ResizeMode.COVER}
-        isLooping={false}
-        shouldPlay={true}
-        onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
-      />
+      {!videoError ? (
+        <Video
+          ref={videoRef}
+          style={styles.video}
+          source={require('../assets/yoga.mp4')}
+          useNativeControls={false}
+          resizeMode={ResizeMode.COVER}
+          isLooping={false}
+          shouldPlay={true}
+          onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+          onError={handleVideoError}
+        />
+      ) : (
+        <View style={[styles.video, styles.fallbackBackground]} />
+      )}
 
       {/* Overlay Gradient */}
       <LinearGradient
@@ -137,6 +162,9 @@ const styles = StyleSheet.create({
   },
   blurView: {
     flex: 1,
+  },
+  fallbackBackground: {
+    backgroundColor: colors.primary,
   },
   brandingContainer: {
     flex: 1,
