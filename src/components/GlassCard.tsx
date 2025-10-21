@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../utils/colors';
@@ -9,8 +9,10 @@ interface GlassCardProps {
   intensity?: 'light' | 'medium' | 'strong';
 }
 
-export default function GlassCard({ children, style, intensity = 'medium' }: GlassCardProps) {
-  const getGlassStyle = () => {
+const GRADIENT_COLORS = ['rgba(255, 255, 255, 0.25)', 'rgba(255, 255, 255, 0.1)'] as const;
+
+function GlassCard({ children, style, intensity = 'medium' }: GlassCardProps) {
+  const glassStyle = useMemo(() => {
     switch (intensity) {
       case 'light':
         return styles.glassLight;
@@ -19,15 +21,12 @@ export default function GlassCard({ children, style, intensity = 'medium' }: Gla
       default:
         return styles.glassMedium;
     }
-  };
+  }, [intensity]);
 
   return (
-    <View style={[styles.container, getGlassStyle(), style]}>
+    <View style={[styles.container, glassStyle, style]}>
       <LinearGradient
-        colors={[
-          'rgba(255, 255, 255, 0.25)',
-          'rgba(255, 255, 255, 0.1)',
-        ]}
+        colors={GRADIENT_COLORS as any}
         style={styles.gradient}
       >
         {children}
@@ -35,6 +34,8 @@ export default function GlassCard({ children, style, intensity = 'medium' }: Gla
     </View>
   );
 }
+
+export default React.memo(GlassCard);
 
 const styles = StyleSheet.create({
   container: {

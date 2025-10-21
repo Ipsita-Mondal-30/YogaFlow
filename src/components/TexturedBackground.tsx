@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../utils/colors';
@@ -8,22 +8,19 @@ interface TexturedBackgroundProps {
   variant?: 'subtle' | 'medium' | 'strong';
 }
 
-export default function TexturedBackground({ children, variant = 'subtle' }: TexturedBackgroundProps) {
-  const getGradientColors = (): [string, string, ...string[]] => {
-    switch (variant) {
-      case 'medium':
-        return [colors.background, colors.accentLight, colors.primaryLight, colors.background];
-      case 'strong':
-        return [colors.accentLight, colors.primaryLight, colors.primary, colors.accentLight];
-      default:
-        return [colors.background, colors.accentLight, colors.background];
-    }
-  };
+const GRADIENT_COLORS = {
+  subtle: [colors.background, colors.accentLight, colors.background],
+  medium: [colors.background, colors.accentLight, colors.primaryLight, colors.background],
+  strong: [colors.accentLight, colors.primaryLight, colors.primary, colors.accentLight],
+} as const;
+
+function TexturedBackground({ children, variant = 'subtle' }: TexturedBackgroundProps) {
+  const gradientColors = useMemo(() => GRADIENT_COLORS[variant], [variant]);
 
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={getGradientColors()}
+        colors={gradientColors as any}
         style={styles.gradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -33,6 +30,8 @@ export default function TexturedBackground({ children, variant = 'subtle' }: Tex
     </View>
   );
 }
+
+export default React.memo(TexturedBackground);
 
 const styles = StyleSheet.create({
   container: {

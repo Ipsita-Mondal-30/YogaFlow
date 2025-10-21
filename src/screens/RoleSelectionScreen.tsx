@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -37,7 +37,7 @@ export default function RoleSelectionScreen({ onRoleSelected }: RoleSelectionScr
     message: '',
   });
 
-  const roles = [
+  const roles = useMemo(() => [
     {
       id: 'STUDENT' as const,
       title: 'Student',
@@ -64,9 +64,9 @@ export default function RoleSelectionScreen({ onRoleSelected }: RoleSelectionScr
         'Share yoga wisdom through blog'
       ]
     }
-  ];
+  ], []);
 
-  const handleRoleSelection = async (role: 'STUDENT' | 'ADMIN') => {
+  const handleRoleSelection = useCallback(async (role: 'STUDENT' | 'ADMIN') => {
     if (!user) {
       setNotification({
         visible: true,
@@ -133,7 +133,7 @@ export default function RoleSelectionScreen({ onRoleSelected }: RoleSelectionScr
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, onRoleSelected]);
 
   return (
     <TexturedBackground variant="medium">
@@ -229,6 +229,14 @@ export default function RoleSelectionScreen({ onRoleSelected }: RoleSelectionScr
             </LinearGradient>
           </TouchableOpacity>
 
+          <TouchableOpacity 
+            style={styles.adminLoginLink}
+            onPress={() => handleRoleSelection('ADMIN')}
+            disabled={loading}
+          >
+            <Text style={styles.adminLoginText}>Login as Admin</Text>
+          </TouchableOpacity>
+
           <Text style={styles.noteText}>
             You can change your role later in your profile settings
           </Text>
@@ -253,37 +261,37 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 40,
+    paddingTop: 40,
+    paddingBottom: 30,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 15,
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 12,
   },
   logoCircle: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 6 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 10,
-    marginBottom: 12,
+    shadowRadius: 8,
+    elevation: 8,
+    marginBottom: 8,
   },
   logoImage: {
-    width: 50,
-    height: 50,
+    width: 40,
+    height: 40,
   },
   logoText: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: colors.secondary,
     textShadowColor: 'rgba(255, 255, 255, 0.5)',
@@ -291,22 +299,22 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   welcomeTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
     color: colors.textPrimary,
-    marginBottom: 8,
+    marginBottom: 6,
     textAlign: 'center',
   },
   welcomeSubtitle: {
-    fontSize: 15,
+    fontSize: 14,
     color: colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 22,
-    paddingHorizontal: 15,
+    lineHeight: 20,
+    paddingHorizontal: 20,
   },
   rolesContainer: {
-    gap: 16,
-    paddingVertical: 15,
+    gap: 12,
+    paddingVertical: 10,
   },
   roleCard: {
     marginBottom: 0,
@@ -330,37 +338,40 @@ const styles = StyleSheet.create({
   },
   roleHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    padding: 16,
+    alignItems: 'flex-start',
+    marginBottom: 10,
+    padding: 14,
     paddingBottom: 0,
   },
   roleIconContainer: {
-    width: 45,
-    height: 45,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 10,
+    marginTop: 2,
     shadowColor: 'rgba(0, 0, 0, 0.2)',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   roleTitleContainer: {
     flex: 1,
+    paddingRight: 8,
   },
   roleTitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: 'bold',
     color: colors.secondary,
-    marginBottom: 3,
+    marginBottom: 4,
+    lineHeight: 20,
   },
   roleDescription: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textSecondary,
-    lineHeight: 18,
+    lineHeight: 16,
     flexShrink: 1,
   },
   selectedIndicator: {
@@ -375,39 +386,40 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   featuresContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    marginHorizontal: 12,
-    marginBottom: 12,
-    borderRadius: 12,
+    marginHorizontal: 10,
+    marginBottom: 10,
+    borderRadius: 10,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 8,
-    paddingVertical: 1,
+    marginBottom: 6,
+    paddingVertical: 0,
   },
   checkmarkContainer: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
-    marginTop: 2,
+    marginRight: 8,
+    marginTop: 1,
+    flexShrink: 0,
   },
   featureText: {
-    fontSize: 12,
+    fontSize: 11,
     color: colors.textPrimary,
     flex: 1,
-    lineHeight: 16,
+    lineHeight: 15,
     fontWeight: '500',
   },
   actionContainer: {
-    paddingVertical: 20,
+    paddingVertical: 15,
     paddingHorizontal: 8,
-    marginTop: 20,
+    marginTop: 10,
   },
   continueButton: {
     borderRadius: 14,
@@ -431,18 +443,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   continueButtonText: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: 'bold',
     color: colors.textWhite,
     marginRight: 10,
     textTransform: 'capitalize',
   },
+  adminLoginLink: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  adminLoginText: {
+    fontSize: 14,
+    color: colors.teal,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
   noteText: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textSecondary,
     textAlign: 'center',
     fontStyle: 'italic',
-    lineHeight: 18,
+    lineHeight: 16,
     opacity: 0.8,
   },
 });
