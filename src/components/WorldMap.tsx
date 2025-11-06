@@ -68,11 +68,11 @@ export default function WorldMap() {
     <GlassCard intensity="light" style={styles.container}>
       <View style={styles.header}>
         <Ionicons name="globe" size={24} color={colors.primary} />
-        <Text style={styles.title}>Global Yoga Community</Text>
+        <Text style={styles.title}>Worldwide Practitioners</Text>
       </View>
       
       <Text style={styles.subtitle}>
-        {activeUsers.length} practitioners online now
+        {activeUsers.length} yogis practicing now
       </Text>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.regionsScroll}>

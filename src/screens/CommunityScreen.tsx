@@ -29,11 +29,24 @@ type MessageWithSender = {
   };
 };
 
+type CustomGroup = {
+  id: string;
+  name: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  description: string;
+  isCustom: boolean;
+};
+
 export default function CommunityScreen() {
   const [messages, setMessages] = useState<MessageWithSender[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [currentRoom, setCurrentRoom] = useState('general');
+  const [showGroupList, setShowGroupList] = useState(false);
+  const [showCreateGroup, setShowCreateGroup] = useState(false);
+  const [customGroups, setCustomGroups] = useState<CustomGroup[]>([]);
+  const [newGroupName, setNewGroupName] = useState('');
+  const [newGroupDescription, setNewGroupDescription] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
   const { isSignedIn } = useAuth();
   const { user } = useUser();
@@ -176,6 +189,8 @@ export default function CommunityScreen() {
 
       console.log('Message sent successfully');
       setNewMessage('');
+      // Auto-scroll after sending
+      scrollToBottom();
     } catch (error) {
       console.error('Error sending message:', error);
       Alert.alert('Error', 'Failed to send message. Please check your connection and try again.');
@@ -185,8 +200,15 @@ export default function CommunityScreen() {
   const scrollToBottom = () => {
     setTimeout(() => {
       scrollViewRef.current?.scrollToEnd({ animated: true });
-    }, 100);
+    }, 150);
   };
+
+  // Auto-scroll when messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      scrollToBottom();
+    }
+  }, [messages]);
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -196,12 +218,48 @@ export default function CommunityScreen() {
     });
   };
 
-  const rooms = [
-    { id: 'general', name: 'General Chat', icon: 'chatbubbles' },
-    { id: 'beginners', name: 'Beginners', icon: 'leaf' },
-    { id: 'advanced', name: 'Advanced', icon: 'fitness' },
-    { id: 'meditation', name: 'Meditation', icon: 'flower' },
+  const defaultGroups: CustomGroup[] = [
+    { id: 'general', name: 'General', icon: 'people', description: 'Main community discussion', isCustom: false },
+    { id: 'beginners', name: 'Beginners Circle', icon: 'leaf', description: 'New to yoga? Start here', isCustom: false },
+    { id: 'advanced', name: 'Advanced Practice', icon: 'fitness', description: 'For experienced practitioners', isCustom: false },
+    { id: 'meditation', name: 'Meditation & Mindfulness', icon: 'flower', description: 'Inner peace discussions', isCustom: false },
+    { id: 'teachers', name: 'Teachers Lounge', icon: 'school', description: 'For yoga instructors', isCustom: false },
+    { id: 'wellness', name: 'Wellness & Nutrition', icon: 'nutrition', description: 'Holistic health topics', isCustom: false },
   ];
+
+  const groups = [...defaultGroups, ...customGroups];
+
+  const handleCreateGroup = () => {
+    if (!newGroupName.trim()) {
+      Alert.alert('Error', 'Please enter a group name');
+      return;
+    }
+
+    const groupId = newGroupName.toLowerCase().replace(/\s+/g, '-');
+    
+    // Check if group already exists
+    if (groups.find(g => g.id === groupId)) {
+      Alert.alert('Error', 'A group with this name already exists');
+      return;
+    }
+
+    const newGroup: CustomGroup = {
+      id: groupId,
+      name: newGroupName.trim(),
+      icon: 'chatbubbles',
+      description: newGroupDescription.trim() || 'Custom community group',
+      isCustom: true,
+    };
+
+    setCustomGroups([...customGroups, newGroup]);
+    setNewGroupName('');
+    setNewGroupDescription('');
+    setShowCreateGroup(false);
+    setCurrentRoom(groupId);
+    setShowGroupList(false);
+    
+    Alert.alert('Success', `Group "${newGroup.name}" created successfully!`);
+  };
 
   if (loading) {
     return (
@@ -211,54 +269,159 @@ export default function CommunityScreen() {
     );
   }
 
+  const currentGroup = groups.find(g => g.id === currentRoom);
+
+  if (showCreateGroup) {
+    return (
+      <View style={styles.container}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <LinearGradient
+          colors={[colors.primary, colors.primaryLight]}
+          style={styles.header}
+        >
+          <View style={styles.headerRow}>
+            <TouchableOpacity onPress={() => setShowCreateGroup(false)} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color={colors.textWhite} />
+            </TouchableOpacity>
+            <Text style={styles.title}>Create New Group</Text>
+            <View style={styles.placeholder} />
+          </View>
+          <Text style={styles.communitySubtitle}>
+            Start your own community group
+          </Text>
+        </LinearGradient>
+
+        <ScrollView style={styles.createGroupContainer}>
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Group Name *</Text>
+            <TextInput
+              style={styles.textInput}
+              value={newGroupName}
+              onChangeText={setNewGroupName}
+              placeholder="e.g., Morning Yoga Enthusiasts"
+              placeholderTextColor={colors.textSecondary}
+              maxLength={50}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Description (Optional)</Text>
+            <TextInput
+              style={[styles.textInput, styles.textArea]}
+              value={newGroupDescription}
+              onChangeText={setNewGroupDescription}
+              placeholder="What is this group about?"
+              placeholderTextColor={colors.textSecondary}
+              multiline
+              numberOfLines={4}
+              maxLength={200}
+            />
+          </View>
+
+          <TouchableOpacity style={styles.createButton} onPress={handleCreateGroup}>
+            <LinearGradient
+              colors={[colors.primary, colors.primaryLight]}
+              style={styles.createButtonGradient}
+            >
+              <Ionicons name="add-circle" size={20} color={colors.textWhite} />
+              <Text style={styles.createButtonText}>Create Group</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
+      </View>
+    );
+  }
+
+  if (showGroupList) {
+    return (
+      <View style={styles.container}>
+      <View style={styles.flex}>
+        <LinearGradient
+          colors={[colors.primary, colors.primaryLight]}
+          style={styles.header}
+        >
+          <View style={styles.headerRow}>
+            <TouchableOpacity onPress={() => setShowGroupList(false)} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color={colors.textWhite} />
+            </TouchableOpacity>
+            <Text style={styles.title}>Community Groups</Text>
+            <TouchableOpacity onPress={() => setShowCreateGroup(true)} style={styles.addButton}>
+              <Ionicons name="add-circle" size={24} color={colors.textWhite} />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.communitySubtitle}>
+            Join groups and connect with like-minded yogis
+          </Text>
+        </LinearGradient>
+
+        <ScrollView 
+          style={styles.groupListContainer}
+          contentContainerStyle={styles.groupListContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {groups.map((group) => (
+            <TouchableOpacity
+              key={group.id}
+              style={styles.groupCard}
+              onPress={() => {
+                setCurrentRoom(group.id);
+                setShowGroupList(false);
+              }}
+            >
+              <View style={[styles.groupIconContainer, currentRoom === group.id && styles.activeGroupIcon]}>
+                <Ionicons name={group.icon as any} size={28} color={colors.primary} />
+              </View>
+              <View style={styles.groupInfo}>
+                <Text style={styles.groupName}>
+                  {group.name}
+                  {group.isCustom && <Text style={styles.customBadge}> • Custom</Text>}
+                </Text>
+                <Text style={styles.groupDescription}>{group.description}</Text>
+              </View>
+              {currentRoom === group.id && (
+                <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
+              )}
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+      </View>
+    );
+  }
+
   return (
+    <View style={styles.container}>
     <KeyboardAvoidingView
-      style={styles.container}
+      style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
       <LinearGradient
         colors={[colors.primary, colors.primaryLight]}
         style={styles.header}
       >
-        <Text style={styles.title}>Community</Text>
-        <Text style={styles.communitySubtitle}>
-          Connect with fellow teachers and fellow practitioners
-        </Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.roomSelector}
-        >
-          {rooms.map((room) => (
-            <TouchableOpacity
-              key={room.id}
-              style={[
-                styles.roomButton,
-                currentRoom === room.id && styles.activeRoomButton
-              ]}
-              onPress={() => setCurrentRoom(room.id)}
-            >
-              <Ionicons
-                name={room.icon as any}
-                size={16}
-                color={currentRoom === room.id ? colors.textWhite : colors.secondary}
-              />
-              <Text style={[
-                styles.roomButtonText,
-                currentRoom === room.id && styles.activeRoomButtonText
-              ]}>
-                {room.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={() => setShowGroupList(true)} style={styles.groupsButton}>
+            <Ionicons name="grid" size={24} color={colors.textWhite} />
+          </TouchableOpacity>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>{currentGroup?.name || 'Community'}</Text>
+            <Text style={styles.groupSubtitle}>{currentGroup?.description}</Text>
+          </View>
+          <View style={styles.placeholder} />
+        </View>
       </LinearGradient>
 
       <ScrollView
         ref={scrollViewRef}
         style={styles.messagesContainer}
+        contentContainerStyle={styles.messagesContent}
         onContentSizeChange={scrollToBottom}
+        onLayout={scrollToBottom}
       >
         {messages.length === 0 ? (
           <View style={styles.emptyContainer}>
@@ -269,19 +432,22 @@ export default function CommunityScreen() {
             </Text>
           </View>
         ) : (
-          messages.map((message) => (
-            <View key={message.id} style={styles.messageItem}>
-              <View style={styles.messageHeader}>
-                <Text style={styles.senderName}>
-                  {message.sender?.name || 'Anonymous'}
-                </Text>
-                <Text style={styles.messageTime}>
-                  {formatTime(message.created_at || new Date().toISOString())}
-                </Text>
+          <>
+            {messages.map((message) => (
+              <View key={message.id} style={styles.messageItem}>
+                <View style={styles.messageHeader}>
+                  <Text style={styles.senderName}>
+                    {message.sender?.name || 'Anonymous'}
+                  </Text>
+                  <Text style={styles.messageTime}>
+                    {formatTime(message.created_at || new Date().toISOString())}
+                  </Text>
+                </View>
+                <Text style={styles.messageContent}>{message.content}</Text>
               </View>
-              <Text style={styles.messageContent}>{message.content}</Text>
-            </View>
-          ))
+            ))}
+            <View style={styles.bottomSpacer} />
+          </>
         )}
       </ScrollView>
 
@@ -322,6 +488,7 @@ export default function CommunityScreen() {
         </View>
       )}
     </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -329,6 +496,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  flex: {
+    flex: 1,
   },
   centerContainer: {
     flex: 1,
@@ -342,51 +512,168 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: 60,
-    paddingBottom: 15,
+    paddingBottom: 20,
     paddingHorizontal: 20,
   },
-  title: {
-    fontSize: 32,
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  groupsButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  placeholder: {
+    width: 40,
+  },
+  addButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+  },
+  createGroupContainer: {
+    flex: 1,
+    padding: 20,
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginBottom: 8,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: colors.lightGray,
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: colors.textPrimary,
+    backgroundColor: colors.white,
+  },
+  textArea: {
+    minHeight: 100,
+    textAlignVertical: 'top',
+  },
+  createButton: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginTop: 10,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  createButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    gap: 8,
+  },
+  createButtonText: {
+    fontSize: 16,
     fontWeight: 'bold',
     color: colors.textWhite,
-    marginBottom: 8,
+  },
+  customBadge: {
+    fontSize: 12,
+    color: colors.teal,
+    fontWeight: '600',
+  },
+  titleContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: colors.textWhite,
+    textAlign: 'center',
+  },
+  groupSubtitle: {
+    fontSize: 12,
+    color: colors.textWhite,
+    opacity: 0.9,
+    textAlign: 'center',
+    marginTop: 2,
   },
   communitySubtitle: {
     fontSize: 14,
     color: colors.textWhite,
     opacity: 0.9,
     textAlign: 'center',
-    marginBottom: 15,
   },
-  roomSelector: {
-    flexDirection: 'row',
+  groupListContainer: {
+    flex: 1,
   },
-  roomButton: {
+  groupListContent: {
+    padding: 15,
+    paddingBottom: 140, // Extra padding for tab bar clearance
+  },
+  groupCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: colors.secondary,
-    marginRight: 10,
+    backgroundColor: colors.cardBackground,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  activeRoomButton: {
-    backgroundColor: colors.secondary,
+  groupIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: colors.accentLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
-  roomButtonText: {
-    fontSize: 14,
-    color: colors.secondary,
-    marginLeft: 5,
-    fontWeight: '600',
+  activeGroupIcon: {
+    backgroundColor: colors.primaryLight,
   },
-  activeRoomButtonText: {
-    color: 'white',
+  groupInfo: {
+    flex: 1,
+  },
+  groupName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.textPrimary,
+    marginBottom: 4,
+  },
+  groupDescription: {
+    fontSize: 13,
+    color: colors.textSecondary,
   },
   messagesContainer: {
     flex: 1,
+  },
+  messagesContent: {
     padding: 15,
-    paddingBottom: 180, // Space for both input container and tab navigation
+    paddingBottom: 200, // Extra space for input and tab bar
+    flexGrow: 1,
+  },
+  bottomSpacer: {
+    height: 20,
   },
   emptyContainer: {
     flex: 1,
@@ -409,24 +696,29 @@ const styles = StyleSheet.create({
   messageItem: {
     backgroundColor: colors.cardBackground,
     padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
+    borderRadius: 12,
+    marginBottom: 12,
     shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
+    maxWidth: '100%',
   },
   messageHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 5,
+    marginBottom: 8,
+    paddingBottom: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.05)',
   },
   senderName: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: 'bold',
     color: colors.primary,
+    flex: 1,
   },
   messageTime: {
     fontSize: 12,
@@ -435,22 +727,28 @@ const styles = StyleSheet.create({
   messageContent: {
     fontSize: 16,
     color: colors.textPrimary,
-    lineHeight: 22,
+    lineHeight: 24,
+    flexWrap: 'wrap',
   },
   inputContainer: {
     flexDirection: 'row',
     padding: 15,
-    paddingBottom: 20,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 15,
     backgroundColor: colors.cardBackground,
     borderTopWidth: 1,
     borderTopColor: colors.lightGray,
-    alignItems: 'center',
+    alignItems: 'flex-end',
     minHeight: 70,
     position: 'absolute',
-    bottom: 110, // Position well above the tab navigation (25 + 65 + 20 margin)
+    bottom: Platform.OS === 'ios' ? 110 : 105,
     left: 0,
     right: 0,
-    zIndex: 500, // Below tab bar but above content
+    zIndex: 500,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 8,
   },
   messageInput: {
     flex: 1,
@@ -469,11 +767,16 @@ const styles = StyleSheet.create({
   },
   sendButton: {
     backgroundColor: colors.primary,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
   },
   disabledSendButton: {
     backgroundColor: colors.lightGray,

@@ -65,8 +65,8 @@ export default function ProfileScreen({ navigation }: any) {
     },
     {
       icon: 'school-outline',
-      title: 'Our Instructors',
-      subtitle: 'Meet our certified Rishikesh masters',
+      title: 'Our Team',
+      subtitle: 'Meet our certified yoga professionals',
       onPress: () => navigation.navigate('Instructors'),
     },
     {
@@ -78,7 +78,10 @@ export default function ProfileScreen({ navigation }: any) {
   ];
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
       <LinearGradient
         colors={[colors.primary, colors.primaryLight]}
         style={styles.header}
@@ -188,8 +191,8 @@ export default function ProfileScreen({ navigation }: any) {
             <View style={styles.uniqueSection}>
               <Text style={styles.uniqueTitle}>🧘‍♀️ What Makes Yoga Flow Unique</Text>
               <View style={styles.uniquePoint}>
-                <Text style={styles.uniqueLabel}>• Rooted in Rishikesh:</Text>
-                <Text style={styles.uniqueDescription}> All our instructors are certified professionals from the spiritual home of yoga.</Text>
+                <Text style={styles.uniqueLabel}>• Expert Team:</Text>
+                <Text style={styles.uniqueDescription}> Our certified professionals bring authentic yoga wisdom and expertise.</Text>
               </View>
             </View>
           </ScrollView>
@@ -206,7 +209,9 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    paddingBottom: 120, // Reduced padding to prevent overlap with tab bar
+  },
+  scrollContent: {
+    paddingBottom: 140, // Extra padding to prevent overlap with tab bar
   },
   header: {
     paddingTop: 60,
@@ -250,7 +255,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingBottom: 20, // Add bottom padding to prevent content overlap
   },
   menuContainer: {
     backgroundColor: colors.cardBackground,
@@ -299,7 +303,7 @@ const styles = StyleSheet.create({
   signOutButton: {
     borderRadius: 12,
     overflow: 'hidden',
-    marginBottom: 30,
+    marginBottom: 20,
     shadowColor: colors.error,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,

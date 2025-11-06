@@ -45,7 +45,7 @@ export default function RoleSelectionScreen({ onRoleSelected }: RoleSelectionScr
       icon: 'school-outline',
       color: colors.primary,
       features: [
-        'Access to live and recorded classes',
+        'Access to live classes',
         'Community chat participation',
         'Free asana library',
         'Progress tracking'
@@ -59,9 +59,9 @@ export default function RoleSelectionScreen({ onRoleSelected }: RoleSelectionScr
       color: colors.teal,
       features: [
         'Create and host live classes',
-        'Upload recorded sessions',
         'Manage student interactions',
-        'Share yoga wisdom through blog'
+        'Share yoga wisdom through blog',
+        'Community engagement tools'
       ]
     }
   ], []);

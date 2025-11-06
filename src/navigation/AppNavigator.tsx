@@ -29,8 +29,9 @@ export type AuthStackParamList = {
 export type StudentTabParamList = {
   Home: undefined;
   Classes: undefined;
+  Curriculum: undefined;
+  Community: undefined;
   Plans: undefined;
-  Chats: undefined;
   Blog: undefined;
   Asanas: undefined;
   Profile: undefined;
@@ -40,7 +41,7 @@ export type AdminTabParamList = {
   Home: undefined;
   Upload: undefined;
   Videos: undefined;
-  Chats: undefined;
+  Community: undefined;
   Profile: undefined;
 };
 
@@ -66,6 +67,7 @@ import EditVideoScreen from '../screens/EditVideoScreen';
 import PlansScreen from '../screens/PlansScreen';
 import ResearchScreen from '../screens/ResearchScreen';
 import InstructorsScreen from '../screens/InstructorsScreen';
+import CurriculumScreen from '../screens/CurriculumScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const AuthStack = createStackNavigator<AuthStackParamList>();
@@ -82,8 +84,9 @@ const StudentTabNavigator = () => {
     >
       <StudentTab.Screen name="Home" component={HomeScreen} />
       <StudentTab.Screen name="Classes" component={ClassesScreen} />
+      <StudentTab.Screen name="Curriculum" component={CurriculumScreen} />
+      <StudentTab.Screen name="Community" component={CommunityScreen} />
       <StudentTab.Screen name="Plans" component={PlansScreen} />
-      <StudentTab.Screen name="Chats" component={CommunityScreen} />
       <StudentTab.Screen name="Blog" component={BlogScreen} />
       <StudentTab.Screen name="Asanas" component={AsanasScreen} />
       <StudentTab.Screen name="Profile" component={ProfileScreen} />
@@ -102,7 +105,7 @@ const AdminTabNavigator = () => {
       <AdminTab.Screen name="Home" component={HomeScreen} />
       <AdminTab.Screen name="Upload" component={AdminVideoUploadScreen} />
       <AdminTab.Screen name="Videos" component={AdminVideosScreen} />
-      <AdminTab.Screen name="Chats" component={CommunityScreen} />
+      <AdminTab.Screen name="Community" component={CommunityScreen} />
       <AdminTab.Screen name="Profile" component={ProfileScreen} />
     </AdminTab.Navigator>
   );
@@ -117,13 +120,7 @@ const AuthNavigator = () => {
   );
 };
 
-const MainAppNavigator = ({
-  hasSeenOnboarding,
-  onOnboardingComplete
-}: {
-  hasSeenOnboarding: boolean;
-  onOnboardingComplete?: () => void;
-}) => {
+const MainAppNavigator = () => {
   const { user } = useUser();
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isCheckingRole, setIsCheckingRole] = useState(true);
@@ -206,16 +203,7 @@ const MainAppNavigator = ({
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {!hasSeenOnboarding ? (
-        <Stack.Screen name="Onboarding">
-          {(props) => (
-            <OnboardingScreen
-              {...props}
-              onOnboardingComplete={onOnboardingComplete}
-            />
-          )}
-        </Stack.Screen>
-      ) : !userRole ? (
+      {!userRole ? (
         <Stack.Screen name="RoleSelection">
           {(props) => (
             <RoleSelectionScreen
@@ -241,20 +229,11 @@ const MainAppNavigator = ({
   );
 };
 
-export default function AppNavigator({
-  hasSeenOnboarding,
-  onOnboardingComplete
-}: {
-  hasSeenOnboarding: boolean;
-  onOnboardingComplete?: () => void;
-}) {
+export default function AppNavigator() {
   return (
     <NavigationContainer>
       <SignedIn>
-        <MainAppNavigator
-          hasSeenOnboarding={hasSeenOnboarding}
-          onOnboardingComplete={onOnboardingComplete}
-        />
+        <MainAppNavigator />
       </SignedIn>
       <SignedOut>
         <AuthNavigator />

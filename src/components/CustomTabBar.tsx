@@ -24,7 +24,8 @@ export default function CustomTabBar({ state, descriptors, navigation }: CustomT
           const getLabel = (routeName: string) => {
             if (routeName === 'Upload') return 'Upload';
             if (routeName === 'Videos') return 'Videos';
-            if (routeName === 'Chats') return 'Chat';
+            if (routeName === 'Community') return 'Community';
+            if (routeName === 'Curriculum') return 'Program';
             if (routeName === 'Plans') return 'Plans';
             return routeName;
           };
@@ -62,8 +63,10 @@ export default function CustomTabBar({ state, descriptors, navigation }: CustomT
               iconName = focused ? 'cloud-upload' : 'cloud-upload-outline';
             } else if (routeName === 'Videos') {
               iconName = focused ? 'videocam' : 'videocam-outline';
-            } else if (routeName === 'Chats' || routeName === 'Community') {
-              iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
+            } else if (routeName === 'Community') {
+              iconName = focused ? 'people' : 'people-outline';
+            } else if (routeName === 'Curriculum') {
+              iconName = focused ? 'calendar' : 'calendar-outline';
             } else if (routeName === 'Blog') {
               iconName = focused ? 'library' : 'library-outline';
             } else if (routeName === 'Asanas') {
@@ -94,14 +97,18 @@ export default function CustomTabBar({ state, descriptors, navigation }: CustomT
               <View style={[styles.iconContainer, isFocused && styles.activeIconContainer]}>
                 <Ionicons
                   name={getIconName(route.name, isFocused)}
-                  size={22}
+                  size={20}
                   color={isFocused ? colors.textWhite : colors.gray}
                 />
               </View>
-              <Text style={[
-                styles.label,
-                isFocused ? styles.activeLabel : styles.inactiveLabel
-              ]}>
+              <Text 
+                style={[
+                  styles.label,
+                  isFocused ? styles.activeLabel : styles.inactiveLabel
+                ]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
                 {label}
               </Text>
             </TouchableOpacity>
@@ -122,7 +129,7 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     flexDirection: 'row',
-    height: 65,
+    height: 68,
     borderRadius: 30,
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 6 },
@@ -131,7 +138,7 @@ const styles = StyleSheet.create({
     elevation: 25,
     paddingTop: 6,
     paddingBottom: 6,
-    paddingHorizontal: 6,
+    paddingHorizontal: 4,
   },
   tabItem: {
     flex: 1,
@@ -139,8 +146,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'relative',
     borderRadius: 22,
-    marginHorizontal: 2,
+    marginHorizontal: 1,
     paddingVertical: 6,
+    minWidth: 40,
   },
   activeBackground: {
     position: 'absolute',
@@ -157,8 +165,10 @@ const styles = StyleSheet.create({
     transform: [{ scale: 1.05 }],
   },
   label: {
-    fontSize: 10,
+    fontSize: 8,
     fontWeight: '600',
+    textAlign: 'center',
+    paddingHorizontal: 2,
   },
   activeLabel: {
     color: colors.textWhite,

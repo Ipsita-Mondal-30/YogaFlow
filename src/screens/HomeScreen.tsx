@@ -7,13 +7,13 @@ import {
   ImageBackground,
   TouchableOpacity,
   Dimensions,
+  SafeAreaView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../utils/colors';
 import TexturedBackground from '../components/TexturedBackground';
 import GlassCard from '../components/GlassCard';
-import WorldMap from '../components/WorldMap';
 import Testimonials from '../components/Testimonials';
 import InviteShare from '../components/InviteShare';
 import { useUserRole } from '../hooks/useUserRole';
@@ -24,8 +24,13 @@ export default function HomeScreen({ navigation }: any) {
   const { isAdmin, isStudent } = useUserRole();
 
   return (
+    <SafeAreaView style={styles.safeArea}>
     <TexturedBackground variant="subtle">
-      <ScrollView style={styles.container}>
+      <ScrollView 
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
       {/* Hero Section */}
       <ImageBackground
         source={{ uri: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80' }}
@@ -71,10 +76,10 @@ export default function HomeScreen({ navigation }: any) {
         <Text style={styles.sectionTitle}>About Yoga Flow</Text>
 
         <GlassCard intensity="light" style={styles.missionCard}>
-          <View style={styles.cardIconContainer}>
+          <View style={styles.cardHeader}>
             <Ionicons name="heart" size={28} color={colors.primary} />
+            <Text style={styles.cardTitle}>Our Mission</Text>
           </View>
-          <Text style={styles.cardTitle}>Our Mission</Text>
           <Text style={styles.cardText}>
             To bring the ancient wisdom of yoga from the spiritual capital of Rishikesh
             to practitioners worldwide through authentic, accessible online classes.
@@ -82,20 +87,20 @@ export default function HomeScreen({ navigation }: any) {
         </GlassCard>
 
         <GlassCard intensity="light" style={styles.missionCard}>
-          <View style={styles.cardIconContainer}>
+          <View style={styles.cardHeader}>
             <Ionicons name="eye" size={28} color={colors.teal} />
+            <Text style={styles.cardTitle}>Our Vision</Text>
           </View>
-          <Text style={styles.cardTitle}>Our Vision</Text>
           <Text style={styles.cardText}>
             To bring the wisdom of traditional yoga from Rishikesh to the world through modern, live experiences.
           </Text>
         </GlassCard>
 
         <GlassCard intensity="light" style={styles.missionCard}>
-          <View style={styles.cardIconContainer}>
+          <View style={styles.cardHeader}>
             <Ionicons name="leaf" size={28} color={colors.mint} />
+            <Text style={styles.cardTitle}>Our Values</Text>
           </View>
-          <Text style={styles.cardTitle}>Our Values</Text>
           <Text style={styles.cardText}>
             Rooted in lineage and elevated by modern tools, we value authenticity, mindful progress, inclusive community, and measurable transformation that honors both tradition and today.
           </Text>
@@ -161,9 +166,6 @@ export default function HomeScreen({ navigation }: any) {
         </View>
       </View>
 
-      {/* World Map */}
-      <WorldMap />
-
       {/* Testimonials */}
       <Testimonials />
 
@@ -198,13 +200,20 @@ export default function HomeScreen({ navigation }: any) {
       </View>
     </ScrollView>
     </TexturedBackground>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   container: {
     flex: 1,
-    paddingBottom: 120,
+  },
+  scrollContent: {
+    paddingBottom: 160, // Extra padding to prevent overlap with tab bar
   },
   hero: {
     height: 450,
@@ -280,28 +289,18 @@ const styles = StyleSheet.create({
   },
   missionCard: {
     marginBottom: 20,
-    alignItems: 'center',
   },
-  cardIconContainer: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    justifyContent: 'center',
+  cardHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: 12,
+    gap: 12,
   },
   cardTitle: {
     fontSize: 22,
     fontWeight: 'bold',
     color: colors.secondary,
-    marginBottom: 12,
-    textAlign: 'center',
+    flex: 1,
   },
   cardText: {
     fontSize: 16,
@@ -354,7 +353,7 @@ const styles = StyleSheet.create({
   },
   contactCta: {
     alignItems: 'center',
-    marginBottom: 50,
+    marginBottom: 30,
   },
   contactIconContainer: {
     width: 70,
