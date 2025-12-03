@@ -23,13 +23,42 @@ export function useUserRole(): UseUserRoleReturn {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Check for admin users first (they don't use Clerk)
+    checkAdminUser();
+    
+    // Then check for Clerk users
     if (isLoaded && user) {
       loadUserRole();
     } else if (isLoaded && !user) {
+      // Only set to null if not an admin
+      checkIfNotAdmin();
+    }
+  }, [user, isLoaded]);
+
+  const checkAdminUser = async () => {
+    try {
+      const role = await AsyncStorage.getItem('userRole');
+      const adminUserId = await AsyncStorage.getItem('adminUserId');
+      
+      if (role === 'ADMIN' && adminUserId) {
+        setUserRole('ADMIN');
+        setIsLoading(false);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error checking admin user:', error);
+      return false;
+    }
+  };
+
+  const checkIfNotAdmin = async () => {
+    const isAdmin = await checkAdminUser();
+    if (!isAdmin) {
       setUserRole(null);
       setIsLoading(false);
     }
-  }, [user, isLoaded]);
+  };
 
   const loadUserRole = async () => {
     if (!user?.id) {
