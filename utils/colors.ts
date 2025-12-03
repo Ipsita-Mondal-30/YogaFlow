@@ -1,60 +1,69 @@
-// Yoga Flow Color Palette - Soothing White-Orange Theme
+// Yoga Flow Color Palette - Teal & White Theme
 export const colors = {
-  // Primary Orange (soothing tones)
-  primary: '#FF8A65',        // Soft coral orange
-  primaryLight: '#FFAB91',   // Light coral
-  primaryDark: '#FF7043',    // Deeper coral
-  
-  // Secondary colors (soft and soothing)
-  secondary: '#5D4E75',      // Soft purple-gray
-  secondaryLight: '#8E7CC3', // Light lavender
-  secondaryDark: '#4A3C5A',  // Deep purple-gray
-  
-  // Accent colors (warm and soothing)
-  accent: '#FFB74D',         // Warm amber
-  accentLight: '#FFCC80',    // Light amber
-  
-  // Neutral colors (clean and soft)
+  // Primary Teal - Main brand color
+  primary: '#00BFA5',        // Rich teal
+  primaryLight: '#64FFDA',   // Bright teal for accents
+  primaryDark: '#00897B',    // Deep teal for depth
+
+  // Secondary colors - Teal variations only
+  secondary: '#006064',      // Deep teal
+  secondaryLight: '#4DD0E1', // Light teal/cyan
+  secondaryDark: '#00363A',  // Very deep teal
+
+  // Accent colors - Teal variations (no orange)
+  accent: '#26A69A',         // Medium teal
+  accentLight: '#80CBC4',    // Light teal
+  accentDark: '#00897B',     // Deep teal
+
+  // Neutral colors (clean whites and grays)
   white: '#FFFFFF',
-  cream: '#FFFEF7',          // Pure cream background
+  cream: '#FAFAFA',          // Soft white background
   lightGray: '#F5F5F5',      // Very light gray
   gray: '#BDBDBD',           // Soft gray
   darkGray: '#757575',       // Medium gray
-  
+
   // Status colors
-  success: '#27AE60',        // Green
-  warning: '#F39C12',        // Orange (same as primaryLight)
-  error: '#E74C3C',          // Red
-  info: '#3498DB',           // Blue
-  
-  // Enhanced colors for Asanas and Blogs (soothing tones)
-  purple: '#B39DDB',         // Soft purple for advanced
-  teal: '#80CBC4',           // Soft teal for beginner
-  indigo: '#9FA8DA',         // Soft indigo for blogs
-  pink: '#F8BBD9',           // Soft pink accent
-  mint: '#A5D6A7',           // Soft mint green
-  orange: '#FFB74D',         // Soft orange
-  
-  // Text colors (soft and readable)
-  textPrimary: '#424242',    // Soft dark gray for primary text
-  textSecondary: '#757575',  // Medium gray for secondary text
-  textLight: '#BDBDBD',      // Light gray for subtle text
+  success: '#00C853',        // Bright green
+  warning: '#00BFA5',        // Teal (instead of orange)
+  error: '#D32F2F',          // Red
+  info: '#0288D1',           // Blue
+
+  // Enhanced colors - All teal variations
+  purple: '#4DD0E1',         // Light cyan (instead of purple)
+  teal: '#26A69A',           // Medium teal
+  indigo: '#00897B',         // Deep teal (instead of indigo)
+  pink: '#64FFDA',           // Bright teal (instead of pink)
+  mint: '#80CBC4',           // Light teal (instead of mint)
+  orange: '#00BFA5',         // Primary teal (instead of orange)
+
+  // Text colors - High contrast for readability
+  textPrimary: '#212121',    // Almost black for primary text
+  textSecondary: '#616161',  // Dark gray for secondary text
+  textLight: '#9E9E9E',      // Medium gray for subtle text
   textWhite: '#FFFFFF',      // White text
-  
-  // Background colors (clean and soothing)
-  background: '#FFFEF7',     // Pure cream background
-  backgroundPrimary: '#FFFEF7', // Primary background (same as background)
-  backgroundSecondary: '#FAFAFA', // Secondary background for inputs/cards
+  textOnTeal: '#FFFFFF',     // White text specifically for teal backgrounds
+  textDark: '#263238',       // Very dark blue-gray for headers
+
+  // Background colors (clean whites)
+  background: '#FFFFFF',     // Pure white background
+  backgroundPrimary: '#FFFFFF', // Pure white primary background
+  backgroundSecondary: '#FAFAFA', // Soft white for inputs/cards
   cardBackground: '#FFFFFF', // Pure white cards
-  inputBackground: '#FAFAFA', // Very light input background
-  
+  inputBackground: '#F5F5F5', // Light gray input background
+
   // Border colors
   borderPrimary: '#E0E0E0',  // Light border color
-  
-  // Gradient colors
-  gradientStart: '#E67E22',  // Orange
-  gradientEnd: '#F39C12',    // Light orange
-  
+  borderSecondary: '#BDBDBD', // Medium border
+
+  // Gradient colors - Teal variations only
+  gradientStart: '#00BFA5',  // Rich teal
+  gradientMid: '#26A69A',    // Medium teal
+  gradientEnd: '#64FFDA',    // Bright teal
+
+  // Alternative gradients - All teal
+  gradientWarm: '#64FFDA',   // Bright teal
+  gradientCool: '#00897B',   // Deep teal
+
   // Shadow
-  shadow: 'rgba(44, 62, 80, 0.1)', // Navy with opacity
+  shadow: 'rgba(0, 0, 0, 0.15)', // Darker shadow for better depth
 };

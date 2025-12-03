@@ -8,11 +8,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors } from '../utils/colors';
 import CustomTabBar from '../components/CustomTabBar';
 import { getUserData } from '../services/userSync';
+import { supabase } from '../services/supabase';
 
 // Navigation Types
 export type RootStackParamList = {
   Main: undefined;
   Contact: undefined;
+  Profile: undefined;
   EditProfile: undefined;
   EditVideo: { video: any };
   Onboarding: undefined;
@@ -22,19 +24,18 @@ export type RootStackParamList = {
 };
 
 export type AuthStackParamList = {
+  AuthChoice: undefined;
   SignIn: undefined;
   SignUp: undefined;
+  AdminSignIn: undefined;
 };
 
 export type StudentTabParamList = {
   Home: undefined;
   Classes: undefined;
-  Curriculum: undefined;
+  Program: undefined;
   Community: undefined;
-  Plans: undefined;
-  Blog: undefined;
-  Asanas: undefined;
-  Profile: undefined;
+  Resources: undefined;
 };
 
 export type AdminTabParamList = {
@@ -42,7 +43,6 @@ export type AdminTabParamList = {
   Upload: undefined;
   Videos: undefined;
   Community: undefined;
-  Profile: undefined;
 };
 
 export type RootStackNavigationProp = StackNavigationProp<RootStackParamList>;
@@ -52,22 +52,22 @@ export type AuthStackNavigationProp = StackNavigationProp<AuthStackParamList>;
 import HomeScreen from '../screens/HomeScreen';
 import ClassesScreen from '../screens/ClassesScreen';
 import CommunityScreen from '../screens/CommunityScreen';
-import BlogScreen from '../screens/BlogScreen';
-import AsanasScreen from '../screens/AsanasScreen';
 import ContactScreen from '../screens/ContactScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
+import AuthChoiceScreen from '../screens/AuthChoiceScreen';
 import SignInScreen from '../screens/SignInScreen';
 import SignUpScreen from '../screens/SignUpScreen';
+import AdminSignInScreen from '../screens/AdminSignInScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import RoleSelectionScreen from '../screens/RoleSelectionScreen';
 import AdminVideoUploadScreen from '../screens/AdminVideoUploadScreen';
 import AdminVideosScreen from '../screens/AdminVideosScreen';
 import EditVideoScreen from '../screens/EditVideoScreen';
-import PlansScreen from '../screens/PlansScreen';
 import ResearchScreen from '../screens/ResearchScreen';
 import InstructorsScreen from '../screens/InstructorsScreen';
-import CurriculumScreen from '../screens/CurriculumScreen';
+import ProgramScreen from '../screens/ProgramScreen';
+import ResourcesScreen from '../screens/ResourcesScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const AuthStack = createStackNavigator<AuthStackParamList>();
@@ -84,12 +84,9 @@ const StudentTabNavigator = () => {
     >
       <StudentTab.Screen name="Home" component={HomeScreen} />
       <StudentTab.Screen name="Classes" component={ClassesScreen} />
-      <StudentTab.Screen name="Curriculum" component={CurriculumScreen} />
+      <StudentTab.Screen name="Program" component={ProgramScreen} />
       <StudentTab.Screen name="Community" component={CommunityScreen} />
-      <StudentTab.Screen name="Plans" component={PlansScreen} />
-      <StudentTab.Screen name="Blog" component={BlogScreen} />
-      <StudentTab.Screen name="Asanas" component={AsanasScreen} />
-      <StudentTab.Screen name="Profile" component={ProfileScreen} />
+      <StudentTab.Screen name="Resources" component={ResourcesScreen} />
     </StudentTab.Navigator>
   );
 };
@@ -106,16 +103,19 @@ const AdminTabNavigator = () => {
       <AdminTab.Screen name="Upload" component={AdminVideoUploadScreen} />
       <AdminTab.Screen name="Videos" component={AdminVideosScreen} />
       <AdminTab.Screen name="Community" component={CommunityScreen} />
-      <AdminTab.Screen name="Profile" component={ProfileScreen} />
     </AdminTab.Navigator>
   );
 };
 
-const AuthNavigator = () => {
+const AuthNavigator = ({ onAdminSignIn }: { onAdminSignIn: (role: 'ADMIN') => void }) => {
   return (
-    <AuthStack.Navigator screenOptions={{ headerShown: false }}>
+    <AuthStack.Navigator screenOptions={{ headerShown: false }} initialRouteName="AuthChoice">
+      <AuthStack.Screen name="AuthChoice" component={AuthChoiceScreen} />
       <AuthStack.Screen name="SignIn" component={SignInScreen} />
       <AuthStack.Screen name="SignUp" component={SignUpScreen} />
+      <AuthStack.Screen name="AdminSignIn">
+        {(props) => <AdminSignInScreen {...props} onSignIn={onAdminSignIn} />}
+      </AuthStack.Screen>
     </AuthStack.Navigator>
   );
 };
@@ -218,6 +218,7 @@ const MainAppNavigator = () => {
             name="Main"
             component={userRole === 'ADMIN' ? AdminTabNavigator : StudentTabNavigator}
           />
+          <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="Contact" component={ContactScreen} />
           <Stack.Screen name="EditProfile" component={EditProfileScreen} />
           <Stack.Screen name="EditVideo" component={EditVideoScreen} />
@@ -230,13 +231,123 @@ const MainAppNavigator = () => {
 };
 
 export default function AppNavigator() {
+  const [adminAuthenticated, setAdminAuthenticated] = useState(false);
+  const [adminRole, setAdminRole] = useState<'ADMIN' | null>(null);
+  const [checkingAdminAuth, setCheckingAdminAuth] = useState(true);
+  const [authKey, setAuthKey] = useState(0); // Force re-render on auth change
+
+  useEffect(() => {
+    checkAdminAuth();
+    
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event);
+      if (event === 'SIGNED_OUT') {
+        setAdminAuthenticated(false);
+        setAdminRole(null);
+        setAuthKey(prev => prev + 1);
+      } else if (event === 'SIGNED_IN' && session) {
+        await checkAdminAuth();
+        setAuthKey(prev => prev + 1);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const checkAdminAuth = async () => {
+    try {
+      const role = await AsyncStorage.getItem('userRole');
+      const adminUserId = await AsyncStorage.getItem('adminUserId');
+      
+      if (role === 'ADMIN' && adminUserId) {
+        // Verify admin session with Supabase
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session && session.user.id === adminUserId) {
+          // Double-check user role in database
+          const { data: userData, error } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', adminUserId)
+            .single();
+          
+          if (!error && userData && (userData.role === 'ADMIN' || userData.role === 'admin')) {
+            setAdminAuthenticated(true);
+            setAdminRole('ADMIN');
+            return;
+          }
+        }
+        
+        // Clear invalid session
+        await AsyncStorage.removeItem('userRole');
+        await AsyncStorage.removeItem('adminUserId');
+        await AsyncStorage.removeItem('adminEmail');
+        setAdminAuthenticated(false);
+        setAdminRole(null);
+      }
+    } catch (error) {
+      console.error('Error checking admin auth:', error);
+      setAdminAuthenticated(false);
+      setAdminRole(null);
+    } finally {
+      setCheckingAdminAuth(false);
+    }
+  };
+
+  const handleAdminSignIn = async (role: 'ADMIN') => {
+    console.log('Admin signed in successfully');
+    setAdminRole(role);
+    setAdminAuthenticated(true);
+    setAuthKey(prev => prev + 1); // Force navigation update
+  };
+
+  const handleAdminSignOut = async () => {
+    await supabase.auth.signOut();
+    await AsyncStorage.removeItem('userRole');
+    await AsyncStorage.removeItem('adminUserId');
+    await AsyncStorage.removeItem('adminEmail');
+    setAdminAuthenticated(false);
+    setAdminRole(null);
+    setAuthKey(prev => prev + 1); // Force navigation update
+  };
+
+  if (checkingAdminAuth) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+        <Text style={{ fontSize: 16, color: colors.textSecondary }}>Loading...</Text>
+      </View>
+    );
+  }
+
+  // Admin is authenticated - show admin navigator
+  if (adminAuthenticated && adminRole === 'ADMIN') {
+    return (
+      <NavigationContainer key={`admin-${authKey}`}>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Main" component={AdminTabNavigator} />
+          <Stack.Screen name="Profile">
+            {(props) => <ProfileScreen {...props} onSignOut={handleAdminSignOut} />}
+          </Stack.Screen>
+          <Stack.Screen name="Contact" component={ContactScreen} />
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+          <Stack.Screen name="EditVideo" component={EditVideoScreen} />
+          <Stack.Screen name="Research" component={ResearchScreen} />
+          <Stack.Screen name="Instructors" component={InstructorsScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+  }
+
+  // Student authentication with Clerk
   return (
-    <NavigationContainer>
+    <NavigationContainer key={`student-${authKey}`}>
       <SignedIn>
         <MainAppNavigator />
       </SignedIn>
       <SignedOut>
-        <AuthNavigator />
+        <AuthNavigator onAdminSignIn={handleAdminSignIn} />
       </SignedOut>
     </NavigationContainer>
   );

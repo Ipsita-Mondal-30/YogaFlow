@@ -200,6 +200,15 @@ export default function SignInScreen({ navigation }: SignInScreenProps) {
                 <Text style={styles.signUpLink}>Sign Up</Text>
               </TouchableOpacity>
             </View>
+
+            {/* Admin Link */}
+            <View style={styles.adminLinkContainer}>
+              <TouchableOpacity onPress={() => navigation.navigate('AdminSignIn')}>
+                <Text style={styles.adminLinkText}>
+                  <Ionicons name="shield-checkmark" size={14} color={colors.secondary} /> Admin / Teacher Sign In
+                </Text>
+              </TouchableOpacity>
+            </View>
           </GlassCard>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -388,5 +397,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: colors.primary,
+  },
+  adminLinkContainer: {
+    alignItems: 'center',
+    paddingBottom: 20,
+    borderTopWidth: 1,
+    borderTopColor: colors.lightGray,
+    paddingTop: 20,
+    marginTop: 10,
+  },
+  adminLinkText: {
+    fontSize: 14,
+    color: colors.secondary,
+    fontWeight: '600',
   },
 });

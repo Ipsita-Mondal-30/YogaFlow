@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../services/supabase';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { colors } from '../utils/colors';
+import ProfileButton from '../components/ProfileButton';
 
 // Extended message type with sender info
 type MessageWithSender = {
@@ -274,17 +275,18 @@ export default function CommunityScreen() {
   if (showCreateGroup) {
     return (
       <View style={styles.container}>
+      <ProfileButton />
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <LinearGradient
-          colors={[colors.primary, colors.primaryLight]}
+          colors={[colors.primary, colors.secondaryLight]}
           style={styles.header}
         >
           <View style={styles.headerRow}>
             <TouchableOpacity onPress={() => setShowCreateGroup(false)} style={styles.backButton}>
-              <Ionicons name="arrow-back" size={24} color={colors.textWhite} />
+              <Ionicons name="arrow-back" size={24} color={colors.textOnTeal} />
             </TouchableOpacity>
             <Text style={styles.title}>Create New Group</Text>
             <View style={styles.placeholder} />
@@ -326,7 +328,7 @@ export default function CommunityScreen() {
               colors={[colors.primary, colors.primaryLight]}
               style={styles.createButtonGradient}
             >
-              <Ionicons name="add-circle" size={20} color={colors.textWhite} />
+              <Ionicons name="add-circle" size={20} color={colors.textOnTeal} />
               <Text style={styles.createButtonText}>Create Group</Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -339,18 +341,19 @@ export default function CommunityScreen() {
   if (showGroupList) {
     return (
       <View style={styles.container}>
+      <ProfileButton />
       <View style={styles.flex}>
         <LinearGradient
-          colors={[colors.primary, colors.primaryLight]}
+          colors={[colors.primary, colors.secondaryLight]}
           style={styles.header}
         >
           <View style={styles.headerRow}>
             <TouchableOpacity onPress={() => setShowGroupList(false)} style={styles.backButton}>
-              <Ionicons name="arrow-back" size={24} color={colors.textWhite} />
+              <Ionicons name="arrow-back" size={24} color={colors.textOnTeal} />
             </TouchableOpacity>
             <Text style={styles.title}>Community Groups</Text>
             <TouchableOpacity onPress={() => setShowCreateGroup(true)} style={styles.addButton}>
-              <Ionicons name="add-circle" size={24} color={colors.textWhite} />
+              <Ionicons name="add-circle" size={24} color={colors.textOnTeal} />
             </TouchableOpacity>
           </View>
           <Text style={styles.communitySubtitle}>
@@ -395,18 +398,19 @@ export default function CommunityScreen() {
 
   return (
     <View style={styles.container}>
+    <ProfileButton />
     <KeyboardAvoidingView
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
       <LinearGradient
-        colors={[colors.primary, colors.primaryLight]}
+        colors={[colors.primary, colors.secondaryLight]}
         style={styles.header}
       >
         <View style={styles.headerRow}>
           <TouchableOpacity onPress={() => setShowGroupList(true)} style={styles.groupsButton}>
-            <Ionicons name="grid" size={24} color={colors.textWhite} />
+            <Ionicons name="grid" size={24} color={colors.textOnTeal} />
           </TouchableOpacity>
           <View style={styles.titleContainer}>
             <Text style={styles.title}>{currentGroup?.name || 'Community'}</Text>
@@ -542,6 +546,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'flex-end',
   },
+  profileButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+  },
   createGroupContainer: {
     flex: 1,
     padding: 20,
@@ -589,7 +599,7 @@ const styles = StyleSheet.create({
   createButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: colors.textWhite,
+    color: colors.textOnTeal,
   },
   customBadge: {
     fontSize: 12,
@@ -603,20 +613,20 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: colors.textWhite,
+    color: colors.textOnTeal,
     textAlign: 'center',
   },
   groupSubtitle: {
     fontSize: 12,
-    color: colors.textWhite,
-    opacity: 0.9,
+    color: colors.textOnTeal,
+    opacity: 0.95,
     textAlign: 'center',
     marginTop: 2,
   },
   communitySubtitle: {
     fontSize: 14,
-    color: colors.textWhite,
-    opacity: 0.9,
+    color: colors.textOnTeal,
+    opacity: 0.95,
     textAlign: 'center',
   },
   groupListContainer: {

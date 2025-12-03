@@ -25,8 +25,8 @@ export default function CustomTabBar({ state, descriptors, navigation }: CustomT
             if (routeName === 'Upload') return 'Upload';
             if (routeName === 'Videos') return 'Videos';
             if (routeName === 'Community') return 'Community';
-            if (routeName === 'Curriculum') return 'Program';
-            if (routeName === 'Plans') return 'Plans';
+            if (routeName === 'Program') return 'Program';
+            if (routeName === 'Resources') return 'Resources';
             return routeName;
           };
 
@@ -57,22 +57,16 @@ export default function CustomTabBar({ state, descriptors, navigation }: CustomT
               iconName = focused ? 'home' : 'home-outline';
             } else if (routeName === 'Classes') {
               iconName = focused ? 'play-circle' : 'play-circle-outline';
-            } else if (routeName === 'Plans') {
-              iconName = focused ? 'diamond' : 'diamond-outline';
+            } else if (routeName === 'Program') {
+              iconName = focused ? 'calendar' : 'calendar-outline';
             } else if (routeName === 'Upload') {
               iconName = focused ? 'cloud-upload' : 'cloud-upload-outline';
             } else if (routeName === 'Videos') {
               iconName = focused ? 'videocam' : 'videocam-outline';
             } else if (routeName === 'Community') {
               iconName = focused ? 'people' : 'people-outline';
-            } else if (routeName === 'Curriculum') {
-              iconName = focused ? 'calendar' : 'calendar-outline';
-            } else if (routeName === 'Blog') {
+            } else if (routeName === 'Resources') {
               iconName = focused ? 'library' : 'library-outline';
-            } else if (routeName === 'Asanas') {
-              iconName = focused ? 'body' : 'body-outline';
-            } else if (routeName === 'Profile') {
-              iconName = focused ? 'person' : 'person-outline';
             } else {
               iconName = 'ellipse';
             }
