@@ -15,6 +15,7 @@ import { useAuth } from '@clerk/clerk-expo';
 import { colors } from '../utils/colors';
 import { useUserRole } from '../hooks/useUserRole';
 import { supabase } from '../services/supabase';
+import ProfileButton from '../components/ProfileButton';
 
 interface Class {
   id: string;
@@ -134,6 +135,7 @@ export default function ClassesScreen() {
 
   return (
     <View style={styles.container}>
+      <ProfileButton />
       <ScrollView
         style={styles.scrollView}
         refreshControl={
@@ -141,7 +143,7 @@ export default function ClassesScreen() {
         }
       >
       <LinearGradient
-        colors={[colors.primary, colors.primaryLight]}
+        colors={[colors.primary, colors.secondaryLight]}
         style={styles.header}
       >
         <Text style={styles.title}>Yoga Classes</Text>
@@ -275,13 +277,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: colors.textWhite,
+    color: colors.textOnTeal,
     marginBottom: 5,
   },
   subtitle: {
     fontSize: 16,
-    color: colors.textWhite,
-    opacity: 0.9,
+    color: colors.textOnTeal,
+    opacity: 0.95,
   },
   emptyContainer: {
     flex: 1,

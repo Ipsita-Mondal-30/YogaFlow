@@ -201,14 +201,14 @@ export default function ResearchScreen({ navigation }: any) {
     <TexturedBackground variant="subtle">
       <ScrollView style={styles.container}>
         <LinearGradient
-          colors={[colors.primary, colors.primaryLight]}
+          colors={[colors.primary, colors.secondaryLight]}
           style={styles.header}
         >
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Ionicons name="arrow-back" size={24} color={colors.textWhite} />
+            <Ionicons name="arrow-back" size={24} color={colors.textOnTeal} />
           </TouchableOpacity>
           <Text style={styles.title}>Scientific Research</Text>
           <Text style={styles.subtitle}>
@@ -334,12 +334,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: colors.textWhite,
+    color: colors.textOnTeal,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
-    color: colors.textWhite,
+    color: colors.textOnTeal,
     opacity: 0.95,
     lineHeight: 22,
     paddingBottom: 5,
