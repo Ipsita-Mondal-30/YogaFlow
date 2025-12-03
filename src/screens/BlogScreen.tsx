@@ -137,7 +137,7 @@ export default function BlogScreen({ navigation }: any) {
       }
     >
       <LinearGradient
-        colors={[colors.primary, colors.primaryLight]}
+        colors={[colors.primary, colors.secondaryLight]}
         style={styles.header}
       >
         <Text style={styles.title}>Yoga Wisdom</Text>
@@ -293,14 +293,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: colors.textWhite,
+    color: colors.textOnTeal,
     marginBottom: 5,
   },
   subtitle: {
     fontSize: 16,
-    color: colors.textWhite,
+    color: colors.textOnTeal,
     lineHeight: 24,
-    opacity: 0.9,
+    opacity: 0.95,
   },
   emptyContainer: {
     flex: 1,
@@ -492,6 +492,7 @@ const styles = StyleSheet.create({
   },
   researchScroll: {
     marginBottom: 15,
+    paddingVertical: 5,
   },
   researchCard: {
     width: 140,
@@ -499,6 +500,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginRight: 15,
     alignItems: 'center',
+    marginVertical: 5,
   },
   researchIcon: {
     width: 40,

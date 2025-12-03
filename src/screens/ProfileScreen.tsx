@@ -14,13 +14,21 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../services/supabase';
 import { colors } from '../utils/colors';
 
-export default function ProfileScreen({ navigation }: any) {
+interface ProfileScreenProps {
+  navigation: any;
+  onSignOut?: () => Promise<void>;
+}
+
+export default function ProfileScreen({ navigation, onSignOut }: ProfileScreenProps) {
   const { signOut } = useAuth();
   const { user } = useUser();
   const [showAbout, setShowAbout] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminEmail, setAdminEmail] = useState<string | null>(null);
 
   useEffect(() => {
     loadUserRole();
@@ -29,7 +37,11 @@ export default function ProfileScreen({ navigation }: any) {
   const loadUserRole = async () => {
     try {
       const role = await AsyncStorage.getItem('userRole');
+      const adminUserId = await AsyncStorage.getItem('adminUserId');
+      const email = await AsyncStorage.getItem('adminEmail');
       setUserRole(role);
+      setIsAdmin(role === 'ADMIN' && !!adminUserId);
+      setAdminEmail(email);
     } catch (error) {
       console.error('Error loading user role:', error);
     }
@@ -46,9 +58,22 @@ export default function ProfileScreen({ navigation }: any) {
           style: 'destructive',
           onPress: async () => {
             try {
-              await signOut();
+              if (isAdmin && onSignOut) {
+                // Admin sign out using callback
+                await onSignOut();
+              } else if (isAdmin) {
+                // Fallback admin sign out
+                await supabase.auth.signOut();
+                await AsyncStorage.removeItem('userRole');
+                await AsyncStorage.removeItem('adminUserId');
+                await AsyncStorage.removeItem('adminEmail');
+              } else {
+                // Student sign out (Clerk)
+                await signOut();
+              }
             } catch (error) {
               console.error('Error signing out:', error);
+              Alert.alert('Error', 'Failed to sign out. Please try again.');
             }
           },
         },
@@ -64,12 +89,6 @@ export default function ProfileScreen({ navigation }: any) {
       onPress: () => navigation.navigate('EditProfile'),
     },
     {
-      icon: 'school-outline',
-      title: 'Our Team',
-      subtitle: 'Meet our certified yoga professionals',
-      onPress: () => navigation.navigate('Instructors'),
-    },
-    {
       icon: 'information-circle-outline',
       title: 'About Yoga Flow',
       subtitle: 'Learn more about our mission',
@@ -83,7 +102,7 @@ export default function ProfileScreen({ navigation }: any) {
         contentContainerStyle={styles.scrollContent}
       >
       <LinearGradient
-        colors={[colors.primary, colors.primaryLight]}
+        colors={[colors.primary, colors.secondaryLight]}
         style={styles.header}
       >
         <View style={styles.profileSection}>
@@ -92,16 +111,22 @@ export default function ProfileScreen({ navigation }: any) {
               <Image source={{ uri: user.imageUrl }} style={styles.avatar} />
             ) : (
               <View style={styles.avatarPlaceholder}>
-                <Ionicons name="person" size={40} color={colors.primary} />
+                <Ionicons name="person" size={40} color={colors.secondary} />
               </View>
             )}
           </View>
           <Text style={styles.userName}>
-            {user?.fullName || user?.firstName || 'Yoga Practitioner'}
+            {isAdmin ? (adminEmail?.split('@')[0] || 'Admin User') : (user?.fullName || user?.firstName || 'Yoga Practitioner')}
           </Text>
           <Text style={styles.userEmail}>
-            {user?.primaryEmailAddress?.emailAddress || 'Welcome to Yoga Flow'}
+            {isAdmin ? (adminEmail || 'Admin Account') : (user?.primaryEmailAddress?.emailAddress || 'Welcome to Yoga Flow')}
           </Text>
+          {isAdmin && (
+            <View style={styles.adminBadge}>
+              <Ionicons name="shield-checkmark" size={16} color={colors.textWhite} />
+              <Text style={styles.adminBadgeText}>Admin</Text>
+            </View>
+          )}
         </View>
       </LinearGradient>
 
@@ -244,13 +269,28 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: colors.textWhite,
+    color: colors.textOnTeal,
     marginBottom: 4,
   },
   userEmail: {
     fontSize: 16,
+    color: colors.textOnTeal,
+    opacity: 0.95,
+  },
+  adminBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginTop: 12,
+  },
+  adminBadgeText: {
+    fontSize: 14,
+    fontWeight: 'bold',
     color: colors.textWhite,
-    opacity: 0.9,
+    marginLeft: 6,
   },
   content: {
     flex: 1,

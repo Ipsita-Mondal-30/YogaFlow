@@ -16,6 +16,7 @@ import TexturedBackground from '../components/TexturedBackground';
 import GlassCard from '../components/GlassCard';
 import Testimonials from '../components/Testimonials';
 import InviteShare from '../components/InviteShare';
+import ProfileButton from '../components/ProfileButton';
 import { useUserRole } from '../hooks/useUserRole';
 
 const { width } = Dimensions.get('window');
@@ -23,9 +24,20 @@ const { width } = Dimensions.get('window');
 export default function HomeScreen({ navigation }: any) {
   const { isAdmin, isStudent } = useUserRole();
 
+  const handleGetStarted = () => {
+    if (isAdmin) {
+      // Navigate to Upload for admins
+      navigation.navigate('Upload');
+    } else {
+      // Navigate to Classes for students
+      navigation.navigate('Classes');
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
     <TexturedBackground variant="subtle">
+      <ProfileButton />
       <ScrollView 
         style={styles.container}
         contentContainerStyle={styles.scrollContent}
@@ -38,9 +50,9 @@ export default function HomeScreen({ navigation }: any) {
       >
         <LinearGradient
           colors={[
-            'rgba(255, 255, 255, 0.2)',
-            'rgba(255, 138, 101, 0.4)',
-            'rgba(93, 78, 117, 0.7)'
+            'rgba(0, 191, 165, 0.3)',
+            'rgba(0, 137, 123, 0.6)',
+            'rgba(0, 96, 100, 0.8)'
           ]}
           style={styles.heroOverlay}
         >
@@ -55,7 +67,7 @@ export default function HomeScreen({ navigation }: any) {
 
             <TouchableOpacity
               style={styles.ctaButton}
-              onPress={() => navigation.navigate('Classes')}
+              onPress={handleGetStarted}
             >
               <LinearGradient
                 colors={[colors.primary, colors.primaryLight]}
@@ -64,7 +76,7 @@ export default function HomeScreen({ navigation }: any) {
                 end={{ x: 1, y: 0 }}
               >
                 <Text style={styles.ctaButtonText}>Get Started</Text>
-                <Ionicons name="arrow-forward" size={20} color={colors.textWhite} />
+                <Ionicons name="arrow-forward" size={20} color={colors.textOnTeal} />
               </LinearGradient>
             </TouchableOpacity>
           </View>
@@ -153,7 +165,7 @@ export default function HomeScreen({ navigation }: any) {
               </GlassCard>
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity onPress={() => navigation.navigate('Blog')}>
+            <TouchableOpacity onPress={() => navigation.navigate('Wisdom')}>
               <GlassCard intensity="medium" style={styles.featureCard}>
                 <View style={styles.featureIconContainer}>
                   <Ionicons name="library" size={40} color={colors.indigo} />
@@ -192,7 +204,7 @@ export default function HomeScreen({ navigation }: any) {
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
             >
-              <Ionicons name="send" size={18} color={colors.textWhite} />
+              <Ionicons name="send" size={18} color={colors.textOnTeal} />
               <Text style={styles.contactButtonText}>Get in Touch</Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -271,7 +283,7 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
   },
   ctaButtonText: {
-    color: colors.textWhite,
+    color: colors.textOnTeal,
     fontSize: 18,
     fontWeight: 'bold',
     marginRight: 8,
@@ -399,7 +411,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   contactButtonText: {
-    color: colors.textWhite,
+    color: colors.textOnTeal,
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 8,
