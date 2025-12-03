@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,9 +15,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
-import { useUser } from '@clerk/clerk-expo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors } from '../utils/colors';
-import { useUserRole } from '../hooks/useUserRole';
 // Cloudinary imports removed - using local file handling for now
 import GlassCard from '../components/GlassCard';
 import { saveVideo } from '../services/videoStorage';
@@ -50,8 +49,6 @@ interface UploadedFile {
 
 const AdminVideoUploadScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { user } = useUser();
-  const { isAdmin, isLoading: roleLoading } = useUserRole();
   
   const [videoData, setVideoData] = useState<VideoData>({
     title: '',
@@ -64,20 +61,40 @@ const AdminVideoUploadScreen: React.FC = () => {
   
   const [selectedVideo, setSelectedVideo] = useState<UploadedFile | null>(null);
   const [selectedThumbnail, setSelectedThumbnail] = useState<UploadedFile | null>(null);
-  // Progress tracking removed for simplified implementation
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminUserId, setAdminUserId] = useState<string | null>(null);
+  const [roleLoading, setRoleLoading] = useState(true);
 
-  // Redirect if not admin
-  React.useEffect(() => {
-    if (!roleLoading && !isAdmin) {
-      Alert.alert(
-        'Access Denied',
-        'You need admin privileges to access this screen.',
-        [{ text: 'OK', onPress: () => navigation.goBack() }]
-      );
+  // Check admin status from AsyncStorage
+  useEffect(() => {
+    checkAdminStatus();
+  }, []);
+
+  const checkAdminStatus = async () => {
+    try {
+      const role = await AsyncStorage.getItem('userRole');
+      const userId = await AsyncStorage.getItem('adminUserId');
+      
+      if (role === 'ADMIN' && userId) {
+        setIsAdmin(true);
+        setAdminUserId(userId);
+      } else {
+        setIsAdmin(false);
+        Alert.alert(
+          'Access Denied',
+          'You need admin privileges to access this screen.',
+          [{ text: 'OK', onPress: () => navigation.goBack() }]
+        );
+      }
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      setIsAdmin(false);
+    } finally {
+      setRoleLoading(false);
     }
-  }, [isAdmin, roleLoading, navigation]);
+  };
 
   const handleInputChange = (field: keyof VideoData, value: string) => {
     setVideoData(prev => ({ ...prev, [field]: value }));
@@ -172,8 +189,8 @@ const AdminVideoUploadScreen: React.FC = () => {
       return;
     }
 
-    if (!user?.id) {
-      Alert.alert('Error', 'User not found. Please sign in again.');
+    if (!adminUserId) {
+      Alert.alert('Error', 'Admin user not found. Please sign in again.');
       return;
     }
 
@@ -192,7 +209,7 @@ const AdminVideoUploadScreen: React.FC = () => {
         videoFileName: selectedVideo.name,
         thumbnailUrl: selectedThumbnail?.uri || undefined,
         thumbnailFileName: selectedThumbnail?.name || undefined,
-        uploadedBy: user.id,
+        uploadedBy: adminUserId,
       };
 
       // Actually save the video to local storage

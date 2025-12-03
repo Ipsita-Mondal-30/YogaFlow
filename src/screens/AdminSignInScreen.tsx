@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,75 +9,70 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
-  Dimensions,
   Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useSignIn, useOAuth } from '@clerk/clerk-expo';
-import * as WebBrowser from 'expo-web-browser';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../services/supabase';
 import { colors } from '../utils/colors';
 import TexturedBackground from '../components/TexturedBackground';
 import GlassCard from '../components/GlassCard';
 
-WebBrowser.maybeCompleteAuthSession();
-
-// Warm up browser for better OAuth performance (native only)
-const useWarmUpBrowser = () => {
-  useEffect(() => {
-    if (Platform.OS !== 'web') {
-      void WebBrowser.warmUpAsync();
-      return () => {
-        void WebBrowser.coolDownAsync();
-      };
-    }
-  }, []);
-};
-
-const { width, height } = Dimensions.get('window');
-
-interface SignInScreenProps {
+interface AdminSignInScreenProps {
   navigation: any;
+  onSignIn: (role: 'ADMIN') => void;
 }
 
-export default function SignInScreen({ navigation }: SignInScreenProps) {
-  useWarmUpBrowser();
-  const { signIn, setActive, isLoaded } = useSignIn();
-  const { startOAuthFlow } = useOAuth({ strategy: 'oauth_google' });
-  const [emailAddress, setEmailAddress] = useState('');
+export default function AdminSignInScreen({ navigation, onSignIn }: AdminSignInScreenProps) {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const onSignInPress = async () => {
-    if (!isLoaded) return;
+  const handleAdminSignIn = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter email and password');
+      return;
+    }
 
     setLoading(true);
     try {
-      const completeSignIn = await signIn.create({
-        identifier: emailAddress,
-        password,
+      // Sign in with Supabase Auth
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password,
       });
 
-      await setActive({ session: completeSignIn.createdSessionId });
-    } catch (err: any) {
-      Alert.alert('Error', err.errors?.[0]?.message || 'Sign in failed');
+      if (error) throw error;
+
+      if (data.user) {
+        // Check if user is admin in database
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', data.user.id)
+          .single();
+
+        if (userError) throw userError;
+
+        if (userData?.role === 'ADMIN' || userData?.role === 'admin') {
+          // Store admin session
+          await AsyncStorage.setItem('userRole', 'ADMIN');
+          await AsyncStorage.setItem('adminUserId', data.user.id);
+          await AsyncStorage.setItem('adminEmail', data.user.email || '');
+          
+          onSignIn('ADMIN');
+        } else {
+          await supabase.auth.signOut();
+          Alert.alert('Access Denied', 'You do not have admin privileges');
+        }
+      }
+    } catch (error: any) {
+      console.error('Admin sign in error:', error);
+      Alert.alert('Error', error.message || 'Sign in failed');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const onGoogleSignIn = async () => {
-    try {
-      const { createdSessionId, setActive: oauthSetActive } = await startOAuthFlow();
-      
-      if (createdSessionId && oauthSetActive) {
-        await oauthSetActive({ session: createdSessionId });
-        console.log('Google sign in successful');
-      }
-    } catch (err: any) {
-      console.error('Google sign in error:', err);
-      Alert.alert('Error', 'Google sign in failed');
     }
   };
 
@@ -93,6 +88,13 @@ export default function SignInScreen({ navigation }: SignInScreenProps) {
         >
           {/* Header */}
           <View style={styles.header}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => navigation.goBack()}
+            >
+              <Ionicons name="arrow-back" size={24} color={colors.secondary} />
+            </TouchableOpacity>
+            
             <View style={styles.logoContainer}>
               <View style={styles.logoCircle}>
                 <Image 
@@ -102,15 +104,15 @@ export default function SignInScreen({ navigation }: SignInScreenProps) {
                 />
               </View>
               <Text style={styles.logoText}>Yoga Flow</Text>
-              <Text style={styles.tagline}>Rishikesh to the World</Text>
+              <Text style={styles.tagline}>Admin Portal</Text>
             </View>
           </View>
 
           {/* Welcome Text */}
           <View style={styles.welcomeContainer}>
-            <Text style={styles.welcomeTitle}>Welcome Back</Text>
+            <Text style={styles.welcomeTitle}>Admin Sign In</Text>
             <Text style={styles.welcomeSubtitle}>
-              Continue your yoga journey with us
+              Access the admin dashboard
             </Text>
           </View>
 
@@ -121,10 +123,10 @@ export default function SignInScreen({ navigation }: SignInScreenProps) {
                 <Ionicons name="mail-outline" size={20} color={colors.gray} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Email address"
+                  placeholder="Admin email"
                   placeholderTextColor={colors.textLight}
-                  value={emailAddress}
-                  onChangeText={setEmailAddress}
+                  value={email}
+                  onChangeText={setEmail}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoComplete="email"
@@ -157,14 +159,10 @@ export default function SignInScreen({ navigation }: SignInScreenProps) {
               </View>
             </View>
 
-            <TouchableOpacity style={styles.forgotPassword}>
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </TouchableOpacity>
-
             <TouchableOpacity
               style={[styles.signInButton, loading && styles.disabledButton]}
-              onPress={onSignInPress}
-              disabled={loading || !emailAddress || !password}
+              onPress={handleAdminSignIn}
+              disabled={loading || !email || !password}
             >
               <LinearGradient
                 colors={[colors.primary, colors.primaryLight]}
@@ -175,38 +173,16 @@ export default function SignInScreen({ navigation }: SignInScreenProps) {
                 {loading ? (
                   <Text style={styles.buttonText}>Signing In...</Text>
                 ) : (
-                  <Text style={styles.buttonText}>Sign In</Text>
+                  <Text style={styles.buttonText}>Sign In as Admin</Text>
                 )}
               </LinearGradient>
             </TouchableOpacity>
 
-            {/* Divider */}
-            <View style={styles.dividerContainer}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or continue with</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            {/* Social Sign In */}
-            <TouchableOpacity style={styles.socialButton} onPress={onGoogleSignIn}>
-              <Ionicons name="logo-google" size={20} color={colors.error} />
-              <Text style={styles.socialButtonText}>Continue with Google</Text>
-            </TouchableOpacity>
-
-            {/* Sign Up Link */}
-            <View style={styles.signUpContainer}>
-              <Text style={styles.signUpText}>Don't have an account? </Text>
-              <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-                <Text style={styles.signUpLink}>Sign Up</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Admin Link */}
-            <View style={styles.adminLinkContainer}>
-              <TouchableOpacity onPress={() => navigation.navigate('AdminSignIn')}>
-                <Text style={styles.adminLinkText}>
-                  <Ionicons name="shield-checkmark" size={14} color={colors.secondary} /> Admin / Teacher Sign In
-                </Text>
+            {/* Back to Student Login */}
+            <View style={styles.switchContainer}>
+              <Text style={styles.switchText}>Not an admin? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
+                <Text style={styles.switchLink}>Student Sign In</Text>
               </TouchableOpacity>
             </View>
           </GlassCard>
@@ -225,9 +201,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   header: {
-    alignItems: 'center',
     paddingTop: 60,
     paddingBottom: 40,
+  },
+  backButton: {
+    marginBottom: 20,
   },
   logoContainer: {
     alignItems: 'center',
@@ -315,15 +293,6 @@ const styles = StyleSheet.create({
     right: 16,
     padding: 4,
   },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: 32,
-  },
-  forgotPasswordText: {
-    fontSize: 14,
-    color: colors.primary,
-    fontWeight: '600',
-  },
   signInButton: {
     borderRadius: 12,
     overflow: 'hidden',
@@ -346,69 +315,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.textWhite,
   },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.lightGray,
-  },
-  dividerText: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginHorizontal: 16,
-  },
-  socialButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.white,
-    borderRadius: 12,
-    paddingVertical: 16,
-    marginBottom: 32,
-    borderWidth: 1,
-    borderColor: colors.lightGray,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  socialButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.textPrimary,
-    marginLeft: 12,
-  },
-  signUpContainer: {
+  switchContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     paddingBottom: 32,
   },
-  signUpText: {
+  switchText: {
     fontSize: 16,
     color: colors.textSecondary,
   },
-  signUpLink: {
+  switchLink: {
     fontSize: 16,
     fontWeight: 'bold',
     color: colors.primary,
-  },
-  adminLinkContainer: {
-    alignItems: 'center',
-    paddingBottom: 20,
-    borderTopWidth: 1,
-    borderTopColor: colors.lightGray,
-    paddingTop: 20,
-    marginTop: 10,
-  },
-  adminLinkText: {
-    fontSize: 14,
-    color: colors.secondary,
-    fontWeight: '600',
   },
 });
